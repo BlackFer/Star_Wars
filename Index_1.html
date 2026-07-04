@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Biblioteca</title>
+    <style>
+        /* RESET y estilos base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-image: 
+                radial-gradient(ellipse at 20% 50%, rgba(180, 150, 100, 0.05) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 50%, rgba(180, 150, 100, 0.05) 0%, transparent 60%);
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            background: linear-gradient(145deg, #1a1a1a 0%, #121212 100%);
+            border-radius: 28px;
+            padding: 55px 45px;
+            border: 1px solid rgba(180, 150, 100, 0.15);
+            box-shadow: 
+                0 30px 80px rgba(0, 0, 0, 0.9),
+                0 0 0 1px rgba(180, 150, 100, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.03);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Línea decorativa superior */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(180, 150, 100, 0.3), rgba(180, 150, 100, 0.6), rgba(180, 150, 100, 0.3), transparent);
+        }
+
+        /* Sutil brillo de fondo */
+        .container::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at 50% 30%, rgba(180, 150, 100, 0.02), transparent 60%);
+            pointer-events: none;
+        }
+
+        /* Logo / Emblema */
+        .emblema {
+            text-align: center;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .emblema span {
+            font-size: 42px;
+            display: inline-block;
+            filter: drop-shadow(0 0 40px rgba(180, 150, 100, 0.1));
+            letter-spacing: 8px;
+        }
+
+        /* Títulos con tipografía elegante */
+        h1 {
+            color: #e8ddd0;
+            font-size: 2.2em;
+            font-weight: 400;
+            text-align: center;
+            letter-spacing: 4px;
+            font-family: 'Georgia', serif;
+            margin-bottom: 6px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .subtitulo {
+            color: #8a7e6b;
+            text-align: center;
+            font-size: 0.85em;
+            font-weight: 300;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            margin-bottom: 45px;
+            position: relative;
+            z-index: 1;
+            font-family: 'Georgia', serif;
+        }
+
+        .subtitulo::after {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 1px;
+            background: rgba(180, 150, 100, 0.3);
+            margin: 15px auto 0;
+        }
+
+        /* Menú de enlaces */
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .menu-item {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            padding: 20px 28px;
+            text-decoration: none;
+            color: #e8ddd0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: 1px solid rgba(180, 150, 100, 0.06);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        /* Efecto de luz al pasar mouse */
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(180, 150, 100, 0.03), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .menu-item:hover::before {
+            opacity: 1;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(180, 150, 100, 0.2);
+            transform: translateX(8px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Contenido del enlace */
+        .item-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .item-icon {
+            font-size: 26px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(180, 150, 100, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(180, 150, 100, 0.06);
+            transition: all 0.4s ease;
+            flex-shrink: 0;
+        }
+
+        .menu-item:hover .item-icon {
+            background: rgba(180, 150, 100, 0.08);
+            border-color: rgba(180, 150, 100, 0.15);
+            transform: scale(1.05) rotate(-2deg);
+        }
+
+        .item-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .item-title {
+            font-size: 1.05em;
+            font-weight: 400;
+            letter-spacing: 1.5px;
+            font-family: 'Georgia', serif;
+        }
+
+        .item-desc {
+            font-size: 0.75em;
+            color: #6a5f4e;
+            font-weight: 300;
+            letter-spacing: 1px;
+            font-family: 'Georgia', serif;
+        }
+
+        /* Flecha elegante */
+        .item-arrow {
+            color: #6a5f4e;
+            font-size: 18px;
+            transition: all 0.4s ease;
+            opacity: 0.3;
+            position: relative;
+            z-index: 1;
+            font-family: 'Georgia', serif;
+        }
+
+        .menu-item:hover .item-arrow {
+            color: #b3966a;
+            transform: translateX(6px);
+            opacity: 1;
+        }
+
+        /* Línea separadora sutil entre items */
+        .menu-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            bottom: -7px;
+            left: 20%;
+            right: 20%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(180, 150, 100, 0.05), transparent);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 45px;
+            text-align: center;
+            color: #3d3830;
+            font-size: 0.7em;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            border-top: 1px solid rgba(180, 150, 100, 0.04);
+            padding-top: 25px;
+            position: relative;
+            z-index: 1;
+            font-family: 'Georgia', serif;
+        }
+
+        .footer span {
+            color: #5a4f3e;
+        }
+
+        .footer .simbolo {
+            color: #b3966a;
+            opacity: 0.3;
+            margin: 0 10px;
+        }
+
+        /* Animación de entrada */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container {
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .menu-item:nth-child(1) { animation: fadeInUp 0.8s ease-out 0.1s both; }
+        .menu-item:nth-child(2) { animation: fadeInUp 0.8s ease-out 0.2s both; }
+        .menu-item:nth-child(3) { animation: fadeInUp 0.8s ease-out 0.3s both; }
+
+        /* Responsive */
+        @media (max-width: 550px) {
+            .container {
+                padding: 35px 22px;
+                border-radius: 20px;
+            }
+            h1 {
+                font-size: 1.7em;
+                letter-spacing: 2px;
+            }
+            .subtitulo {
+                font-size: 0.7em;
+                letter-spacing: 4px;
+            }
+            .menu-item {
+                padding: 16px 18px;
+            }
+            .item-icon {
+                font-size: 22px;
+                width: 42px;
+                height: 42px;
+            }
+            .item-title {
+                font-size: 0.95em;
+            }
+            .item-desc {
+                font-size: 0.7em;
+            }
+            .emblema span {
+                font-size: 34px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .container {
+                padding: 25px 16px;
+            }
+            .item-content {
+                gap: 12px;
+            }
+            .item-icon {
+                font-size: 18px;
+                width: 36px;
+                height: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Emblema decorativo -->
+        <div class="emblema">
+            <span>✦</span>
+        </div>
+
+        <!-- Títulos -->
+        <h1>Cantina</h1>
+        <p class="subtitulo">Recursos espaciales</p>
+
+        <!-- Menú con 3 enlaces -->
+        <div class="menu">
+            
+            <!-- Enlace 1: Reglas de combate -->
+            <a href="Reglas_Basicas_STAR" class="menu-item">
+                <div class="item-content">
+                    <div class="item-icon">⚔️</div>
+                    <div class="item-text">
+                        <span class="item-title">Reglas de Combate</span>
+                        <span class="item-desc">Sistema de batallas y estrategias</span>
+                    </div>
+                </div>
+                <span class="item-arrow">→</span>
+            </a>
+
+            <!-- Enlace 2: Creador de persona -->
+            <a href="Creador_Personajes" class="menu-item">
+                <div class="item-content">
+                    <div class="item-icon">🎭</div>
+                    <div class="item-text">
+                        <span class="item-title">Creador de Personajes</span>
+                        <span class="item-desc">Diseña héroes y villanos únicos</span>
+                    </div>
+                </div>
+                <span class="item-arrow">→</span>
+            </a>
+
+            <!-- Enlace 3: Generador de armas -->
+            <a href="generador-armas.html" class="menu-item">
+                <div class="item-content">
+                    <div class="item-icon">🗡️</div>
+                    <div class="item-text">
+                        <span class="item-title">Generador de Armas</span>
+                        <span class="item-desc">Crea equipo legendario</span>
+                    </div>
+                </div>
+                <span class="item-arrow">→</span>
+            </a>
+
+        </div>
+
+        <!-- Footer elegante -->
+        <div class="footer">
+            <span class="simbolo">✦</span>
+            <span>2026</span>
+            <span class="simbolo">✦</span>
+        </div>
+    </div>
+</body>
+</html>

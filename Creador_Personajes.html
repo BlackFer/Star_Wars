@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creador de Personajes — Star Wars Saga Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-deep: #040810;
+            --bg-panel: rgba(6,14,28,0.75);
+            --bg-input: rgba(0,212,255,0.06);
+            --bg-card: rgba(8,18,35,0.85);
+            --bg-stat: rgba(0,0,0,0.35);
+            --accent-yellow: #FFE81F;
+            --accent-cyan: #00d4ff;
+            --accent-red: #ff4757;
+            --accent-green: #2ed573;
+            --accent-orange: #ffa502;
+            --text-primary: #dce6f0;
+            --text-secondary: #8a9db0;
+            --text-muted: #4a5a6a;
+            --border-glow: rgba(0,212,255,0.22);
+            --border-subtle: rgba(0,212,255,0.08);
+            --border-yellow: rgba(255,232,31,0.25);
+            --ease: cubic-bezier(0.4,0,0.2,1);
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        html{scroll-behavior:smooth;}
+        body{
+            background:var(--bg-deep);
+            font-family:'Rajdhani',sans-serif;
+            color:var(--text-primary);
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+
+        /* === FONDO === */
+        #starfield{position:fixed;inset:0;z-index:-2;}
+        .scanlines{position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.015) 2px,rgba(0,0,0,0.015) 4px);pointer-events:none;z-index:9998;}
+        .nebula{position:fixed;border-radius:50%;filter:blur(110px);pointer-events:none;z-index:-1;}
+        .neb-1{width:500px;height:500px;background:radial-gradient(circle,rgba(20,0,80,0.35),transparent 70%);top:-120px;right:-80px;}
+        .neb-2{width:400px;height:400px;background:radial-gradient(circle,rgba(0,50,90,0.25),transparent 70%);bottom:-100px;left:-60px;}
+        .neb-3{width:280px;height:280px;background:radial-gradient(circle,rgba(80,20,40,0.18),transparent 70%);top:45%;left:35%;}
+
+        /* === HEADER === */
+        .app-header{
+            text-align:center;
+            padding:32px 20px 18px;
+            position:relative;
+        }
+        .app-header h1{
+            font-family:'Orbitron',sans-serif;
+            font-size:clamp(1.4rem,3.5vw,2.2rem);
+            font-weight:900;
+            color:var(--accent-yellow);
+            text-shadow:0 0 30px rgba(255,232,31,0.2),0 2px 4px rgba(0,0,0,0.5);
+            letter-spacing:4px;
+            animation:fade-in .7s var(--ease) both;
+        }
+        .app-header .sub{
+            color:var(--text-secondary);
+            font-size:.95rem;
+            margin-top:6px;
+            animation:fade-in .7s var(--ease) .1s both;
+        }
+        .header-line{
+            display:flex;align-items:center;justify-content:center;gap:12px;
+            margin-top:16px;animation:fade-in .7s var(--ease) .2s both;
+        }
+        .hline{height:1px;width:80px;background:linear-gradient(90deg,transparent,var(--accent-cyan),transparent);}
+        .hdiamond{color:var(--accent-cyan);font-size:.5rem;}
+        @keyframes fade-in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+        /* === LAYOUT PRINCIPAL === */
+        .creator-wrap{
+            max-width:1400px;
+            margin:0 auto;
+            padding:0 20px 60px;
+            display:flex;
+            gap:24px;
+            align-items:flex-start;
+        }
+
+        /* === PANEL FORMULARIO === */
+        .form-panel{
+            flex:2.2;
+            min-width:0;
+            display:flex;
+            flex-direction:column;
+            gap:16px;
+        }
+        .form-card{
+            background:var(--bg-panel);
+            backdrop-filter:blur(12px);
+            -webkit-backdrop-filter:blur(12px);
+            border:1px solid var(--border-subtle);
+            border-radius:16px;
+            padding:20px;
+            border-left:3px solid var(--accent-yellow);
+            transition:border-color .3s var(--ease);
+            animation:card-in .5s var(--ease) both;
+        }
+        .form-card:hover{border-color:var(--border-glow);}
+        @keyframes card-in{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
+        .form-card h3{
+            font-family:'Orbitron',sans-serif;
+            font-size:.75rem;
+            font-weight:700;
+            letter-spacing:2px;
+            color:var(--accent-cyan);
+            margin-bottom:14px;
+            display:flex;align-items:center;gap:8px;
+        }
+        .form-card h3 i{color:var(--accent-yellow);font-size:.85rem;}
+
+        /* === FORM ELEMENTS === */
+        .field{margin-bottom:12px;}
+        .field label{
+            display:block;
+            font-weight:600;
+            color:var(--accent-yellow);
+            font-size:.88rem;
+            margin-bottom:4px;
+            letter-spacing:.5px;
+        }
+        .field select,
+        .field input[type="text"],
+        .field input[type="number"],
+        .field input[type="url"]{
+            width:100%;
+            padding:10px 14px;
+            border-radius:10px;
+            border:1px solid var(--border-subtle);
+            background:var(--bg-input);
+            color:var(--text-primary);
+            font-family:'Rajdhani',sans-serif;
+            font-size:.92rem;
+            font-weight:500;
+            outline:none;
+            transition:border-color .3s var(--ease),box-shadow .3s var(--ease);
+        }
+        .field select:focus,
+        .field input:focus{
+            border-color:var(--accent-cyan);
+            box-shadow:0 0 10px rgba(0,212,255,0.12);
+        }
+        .field select option{background:#0a1520;color:#ddd;}
+        .field input:disabled{opacity:.4;cursor:not-allowed;}
+        .field .hint{font-size:.78rem;color:var(--text-muted);margin-top:3px;}
+
+        .attr-grid{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:8px;
+        }
+        .attr-grid .field{margin-bottom:4px;}
+
+        .mod-ref{
+            background:rgba(0,212,255,0.05);
+            border:1px solid var(--border-subtle);
+            border-radius:10px;
+            padding:8px 12px;
+            font-size:.78rem;
+            color:var(--text-secondary);
+            margin-top:8px;
+            overflow-x:auto;
+        }
+        .mod-ref table{border-collapse:collapse;width:100%;}
+        .mod-ref td{padding:2px 6px;border:1px solid var(--border-subtle);text-align:center;white-space:nowrap;}
+        .mod-ref td:first-child{color:var(--accent-yellow);font-weight:600;}
+
+        /* === PUNTOS === */
+        .points-box{
+            background:rgba(255,232,31,0.06);
+            border:1px solid var(--border-yellow);
+            border-radius:12px;
+            padding:12px 16px;
+            text-align:center;
+            margin-bottom:12px;
+        }
+        .points-box .pts-num{
+            font-family:'Orbitron',sans-serif;
+            font-size:1.3rem;
+            font-weight:700;
+            color:var(--accent-yellow);
+        }
+        .pts-warn{font-size:.82rem;margin-top:4px;}
+        .pts-ok{color:var(--accent-green);}
+        .pts-over{color:var(--accent-red);}
+        .pts-left{color:var(--accent-cyan);}
+
+        /* === NIVEL ROW === */
+        .level-row{display:flex;gap:10px;align-items:center;}
+        .level-row .field{flex:1;margin-bottom:0;}
+
+        /* === ESPECIE INFO === */
+        .species-info{
+            background:rgba(0,212,255,0.05);
+            border:1px solid var(--border-subtle);
+            border-radius:10px;
+            padding:8px 12px;
+            font-size:.85rem;
+            color:var(--text-secondary);
+            margin-top:4px;
+            line-height:1.5;
+        }
+        .species-info .sp-mod{color:var(--accent-yellow);font-weight:600;}
+
+        /* === CLASS INFO === */
+        .class-info{
+            background:rgba(0,212,255,0.05);
+            border:1px solid var(--border-subtle);
+            border-radius:10px;
+            padding:10px 12px;
+            font-size:.85rem;
+            color:var(--text-secondary);
+            margin-top:4px;
+            line-height:1.5;
+        }
+        .type-badge{
+            display:inline-block;
+            padding:2px 10px;
+            border-radius:20px;
+            font-weight:700;
+            font-size:.7rem;
+            letter-spacing:.5px;
+            margin-right:6px;
+        }
+        .type-badge.hero{background:rgba(0,212,255,0.15);color:var(--accent-cyan);border:1px solid rgba(0,212,255,0.3);}
+        .type-badge.prestige{background:rgba(255,165,2,0.15);color:var(--accent-orange);border:1px solid rgba(255,165,2,0.3);}
+        .class-info .req{color:var(--accent-orange);margin-top:4px;font-size:.8rem;}
+        .class-info .base-sk{color:var(--accent-cyan);margin-top:3px;font-size:.8rem;}
+
+        /* === HABILIDADES === */
+        .skill-header{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            flex-wrap:wrap;
+            gap:8px;
+            margin-bottom:8px;
+        }
+        .skill-counter{font-size:.9rem;color:var(--text-secondary);}
+        .skill-counter span{font-weight:700;color:var(--accent-yellow);}
+        .skill-btns{display:flex;gap:6px;}
+        .skill-list{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:6px;
+            max-height:320px;
+            overflow-y:auto;
+            padding:4px;
+        }
+        .skill-list::-webkit-scrollbar{width:4px;}
+        .skill-list::-webkit-scrollbar-track{background:transparent;}
+        .skill-list::-webkit-scrollbar-thumb{background:var(--border-glow);border-radius:4px;}
+        .sk-item{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            background:var(--bg-stat);
+            padding:6px 10px;
+            border-radius:10px;
+            font-size:.85rem;
+            border:1px solid transparent;
+            transition:border-color .2s;
+        }
+        .sk-item:hover{border-color:var(--border-subtle);}
+        .sk-item input[type="checkbox"]{
+            width:16px;height:16px;
+            margin:0;accent-color:var(--accent-yellow);
+            cursor:pointer;flex-shrink:0;
+        }
+        .sk-item label{margin:0;cursor:pointer;color:var(--text-primary);font-weight:400;flex:1;font-size:.85rem;}
+        .sk-item .sk-mod{color:var(--accent-cyan);font-weight:700;font-size:.82rem;white-space:nowrap;}
+
+        /* === DOTE/TALENTO === */
+        .ft-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+        .ft-grid .field{margin-bottom:4px;}
+        .effect-desc{
+            font-size:.82rem;
+            color:var(--accent-cyan);
+            background:rgba(0,212,255,0.05);
+            border:1px solid var(--border-subtle);
+            border-radius:10px;
+            padding:6px 10px;
+            margin-top:4px;
+            min-height:32px;
+            line-height:1.4;
+        }
+
+        /* === BOTONES === */
+        .btn{
+            display:inline-flex;align-items:center;justify-content:center;gap:6px;
+            padding:9px 18px;
+            border-radius:10px;
+            border:1px solid transparent;
+            font-family:'Rajdhani',sans-serif;
+            font-size:.85rem;
+            font-weight:700;
+            cursor:pointer;
+            transition:all .25s var(--ease);
+            white-space:nowrap;
+        }
+        .btn:focus-visible{outline:2px solid var(--accent-cyan);outline-offset:2px;}
+        .btn-yellow{background:var(--accent-yellow);color:#0a0f1e;border-color:var(--accent-yellow);}
+        .btn-yellow:hover{background:#e6d01b;box-shadow:0 0 14px rgba(255,232,31,0.3);transform:translateY(-1px);}
+        .btn-green{background:rgba(46,213,115,0.15);color:var(--accent-green);border-color:rgba(46,213,115,0.3);}
+        .btn-green:hover{background:rgba(46,213,115,0.25);box-shadow:0 0 12px rgba(46,213,115,0.15);}
+        .btn-cyan{background:rgba(0,212,255,0.12);color:var(--accent-cyan);border-color:var(--border-glow);}
+        .btn-cyan:hover{background:rgba(0,212,255,0.22);box-shadow:0 0 12px rgba(0,212,255,0.15);}
+        .btn-red{background:rgba(255,71,87,0.12);color:var(--accent-red);border-color:rgba(255,71,87,0.3);}
+        .btn-red:hover{background:rgba(255,71,87,0.22);}
+        .btn-sm{padding:5px 12px;font-size:.78rem;border-radius:8px;}
+        .btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
+        .action-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
+
+        /* === GUARDADOS === */
+        .saved-box{
+            background:rgba(0,0,0,0.3);
+            border:1px solid var(--border-subtle);
+            border-radius:12px;
+            padding:10px;
+            margin-top:10px;
+        }
+        .saved-box strong{color:var(--text-secondary);font-size:.85rem;}
+        .saved-item{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            background:var(--bg-stat);
+            padding:8px 12px;
+            border-radius:10px;
+            margin-top:6px;
+            border:1px solid var(--border-subtle);
+        }
+        .saved-item .si-name{font-weight:600;color:var(--text-primary);font-size:.88rem;}
+        .saved-item .si-info{font-size:.75rem;color:var(--text-muted);}
+        .saved-item .si-del{
+            background:none;border:none;color:var(--accent-red);cursor:pointer;
+            font-size:.85rem;padding:4px 8px;border-radius:6px;transition:background .2s;
+        }
+        .saved-item .si-del:hover{background:rgba(255,71,87,0.15);}
+
+        /* === PANEL VISTA PREVIA === */
+        .preview-panel{
+            flex:1.5;
+            min-width:300px;
+            position:sticky;
+            top:20px;
+        }
+        .preview-title{
+            font-family:'Orbitron',sans-serif;
+            font-size:.75rem;
+            font-weight:700;
+            letter-spacing:2px;
+            color:var(--accent-cyan);
+            margin-bottom:14px;
+            display:flex;align-items:center;gap:8px;
+            animation:card-in .5s var(--ease) .15s both;
+        }
+        .preview-title i{color:var(--accent-yellow);}
+
+        .char-card{
+            background:var(--bg-card);
+            backdrop-filter:blur(14px);
+            -webkit-backdrop-filter:blur(14px);
+            border:1px solid var(--border-yellow);
+            border-radius:18px;
+            padding:22px;
+            box-shadow:0 0 40px rgba(255,232,31,0.04),0 8px 30px rgba(0,0,0,0.4);
+            animation:card-in .5s var(--ease) .2s both;
+        }
+        .cc-name{
+            font-family:'Orbitron',sans-serif;
+            font-size:1.5rem;
+            font-weight:900;
+            color:var(--accent-yellow);
+            border-left:4px solid var(--accent-yellow);
+            padding-left:14px;
+            margin-bottom:12px;
+            text-shadow:0 0 20px rgba(255,232,31,0.15);
+            word-break:break-word;
+        }
+        .cc-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+        .cc-badge{
+            display:inline-block;
+            padding:3px 12px;
+            border-radius:20px;
+            font-weight:700;
+            font-size:.75rem;
+            letter-spacing:.5px;
+        }
+        .cc-badge.class-b{background:rgba(0,212,255,0.12);color:var(--accent-cyan);border:1px solid rgba(0,212,255,0.25);}
+        .cc-badge.species-b{background:rgba(46,213,115,0.12);color:var(--accent-green);border:1px solid rgba(46,213,115,0.25);}
+        .cc-badge.level-b{background:rgba(255,232,31,0.12);color:var(--accent-yellow);border:1px solid rgba(255,232,31,0.25);}
+        .cc-badge.prestige-b{background:rgba(255,165,2,0.12);color:var(--accent-orange);border:1px solid rgba(255,165,2,0.25);}
+
+        .cc-species-mod{font-size:.78rem;color:var(--accent-cyan);margin-bottom:10px;}
+
+        .cc-stats{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:6px;
+            background:rgba(0,0,0,0.25);
+            padding:10px;
+            border-radius:14px;
+            margin:12px 0;
+            border:1px solid var(--border-subtle);
+        }
+        .cc-stat{
+            text-align:center;
+            background:var(--bg-stat);
+            padding:8px 4px;
+            border-radius:10px;
+        }
+        .cc-stat .cs-name{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;}
+        .cc-stat .cs-val{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent-yellow);}
+        .cc-stat .cs-mod{font-size:.75rem;color:var(--accent-cyan);font-weight:600;}
+
+        .cc-divider{
+            border:none;
+            border-top:1px solid var(--border-subtle);
+            margin:14px 0;
+        }
+
+        .cc-row{margin-bottom:8px;font-size:.9rem;}
+        .cc-row strong{color:#fff;}
+        .cc-row .cc-effect{font-size:.82rem;color:var(--accent-cyan);margin-left:4px;}
+
+        .cc-hp{
+            text-align:center;
+            background:rgba(255,71,87,0.08);
+            border:1px solid rgba(255,71,87,0.2);
+            border-radius:14px;
+            padding:10px;
+            margin:10px 0;
+        }
+        .cc-hp .hp-label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;}
+        .cc-hp .hp-val{font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;color:var(--accent-red);}
+
+        .cc-defenses{
+            display:flex;
+            justify-content:space-around;
+            background:rgba(0,0,0,0.3);
+            border:1px solid var(--border-subtle);
+            border-radius:14px;
+            padding:10px;
+            margin:10px 0;
+        }
+        .cc-def{text-align:center;}
+        .cc-def .cd-label{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;}
+        .cc-def .cd-val{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent-cyan);}
+
+        .cc-skills-title{font-size:.85rem;color:var(--text-secondary);margin-bottom:6px;}
+        .cc-skills-list{font-size:.85rem;color:var(--accent-cyan);line-height:1.6;}
+
+        .cc-weapon{
+            text-align:center;
+            background:rgba(0,0,0,0.25);
+            border:1px solid var(--border-subtle);
+            border-radius:12px;
+            padding:10px;
+            margin:10px 0;
+            font-size:.88rem;
+        }
+        .cc-weapon strong{color:var(--accent-yellow);}
+
+        /* === TOAST === */
+        .toast{
+            position:fixed;bottom:24px;left:50%;
+            transform:translateX(-50%) translateY(80px);
+            background:var(--bg-panel);border:1px solid var(--border-glow);
+            border-radius:12px;padding:12px 24px;
+            color:var(--accent-cyan);font-family:'Rajdhani',sans-serif;
+            font-size:.9rem;font-weight:600;z-index:10000;opacity:0;
+            transition:all .4s var(--ease);pointer-events:none;
+            backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+            box-shadow:0 8px 30px rgba(0,0,0,0.5);white-space:nowrap;
+        }
+        .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+        /* === RESPONSIVE === */
+        @media(max-width:900px){
+            .creator-wrap{flex-direction:column;}
+            .preview-panel{position:static;min-width:0;}
+            .skill-list{grid-template-columns:1fr;}
+            .ft-grid{grid-template-columns:1fr;}
+        }
+        @media(max-width:480px){
+            .attr-grid{grid-template-columns:1fr;}
+            .cc-stats{grid-template-columns:repeat(2,1fr);}
+            .action-bar{flex-direction:column;}
+            .action-bar .btn{width:100%;}
+        }
+
+        /* === REDUCIR MOVIMIENTO === */
+        @media(prefers-reduced-motion:reduce){
+            *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+            .form-card,.char-card,.preview-title{animation:none!important;opacity:1;transform:none;}
+        }
+
+        /* === IMPRESIÓN === */
+        @media print{
+            body{background:#fff;color:#111;font-size:10pt;}
+            body *{visibility:hidden;}
+            .print-area,.print-area *{visibility:visible;}
+            .print-area{
+                position:absolute;top:0;left:0;width:100%;
+                background:#0a0f1e;color:#f0f0f0;padding:0;margin:0;
+            }
+            @page{size:A4;margin:.5cm;}
+            .print-area .sw-card{
+                background:#1e2a36;border-radius:18px;padding:16px 18px;
+                border:2px solid #ffd966;font-size:10px;line-height:1.35;
+                display:grid;grid-template-columns:1fr 2.5fr;gap:14px;
+                page-break-inside:avoid;
+            }
+            .print-area .sw-left{
+                display:flex;flex-direction:column;align-items:center;gap:8px;
+                border-right:1px solid #3a6e8c;padding-right:14px;
+            }
+            .print-area .sw-right{display:flex;flex-direction:column;gap:6px;}
+            .print-area .sw-photo{
+                width:100%;aspect-ratio:1/1;background:#0f1a22;
+                border:2px solid #ffd966;border-radius:14px;
+                display:flex;align-items:center;justify-content:center;
+                overflow:hidden;font-size:.75rem;color:#555;
+            }
+            .print-area .sw-photo img{width:100%;height:100%;object-fit:cover;}
+            .print-area .sw-header{text-align:center;border-bottom:2px solid #ffd966;padding-bottom:6px;margin-bottom:6px;}
+            .print-area .sw-header h1{font-size:1rem;color:#ffe81f;margin:0;letter-spacing:2px;font-family:'Orbitron',sans-serif;}
+            .print-area .sw-header h2{font-size:1.2rem;margin:2px 0;color:#f0f0f0;border-left:3px solid #ffd966;padding-left:8px;display:inline-block;}
+            .print-area .sw-header .subtitle{font-size:.65rem;color:#aaccff;}
+            .print-area .sw-badge{display:inline-block;padding:1px 8px;border-radius:20px;background:#2c5a6e;color:#fff;font-weight:700;font-size:.55rem;margin:0 2px;}
+            .print-area .sw-badge.prestige{background:#6e4c2c;border:1px solid #ffa500;}
+            .print-area .sw-species-mod{font-size:.55rem;color:#88ddff;background:#0f1a22;padding:1px 8px;border-radius:20px;display:inline-block;margin-top:2px;}
+            .print-area .sw-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;background:#0f1a22;padding:5px;border-radius:8px;border:1px solid #3a6e8c;}
+            .print-area .sw-stat{text-align:center;font-weight:700;font-size:.7rem;}
+            .print-area .sw-stat span{color:#ffd966;}
+            .print-area .sw-defenses{display:flex;justify-content:space-around;background:#031016;padding:4px;border-radius:12px;border:1px solid #3a6e8c;font-size:.7rem;}
+            .print-area .sw-hp{text-align:center;background:#031016;padding:4px;border-radius:12px;font-size:.75rem;font-weight:700;border:1px solid #3a6e8c;}
+            .print-area .sw-combat{display:grid;grid-template-columns:1fr 1fr;gap:3px;background:#0f1a22;padding:5px;border-radius:8px;border:1px solid #3a6e8c;font-size:.65rem;}
+            .print-area .sw-combat div{text-align:center;}
+            .print-area .sw-combat strong{color:#ffd966;}
+            .print-area .sw-feat-talent{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#0f1a22;padding:5px;border-radius:8px;border:1px solid #3a6e8c;font-size:.6rem;}
+            .print-area .sw-feat-talent strong{color:#ffd966;}
+            .print-area .sw-feat-talent span{font-size:.55rem;color:#aaddff;}
+            .print-area .sw-weapon-box{background:#0f1a22;padding:5px;border-radius:8px;border:1px solid #3a6e8c;text-align:center;font-size:.7rem;}
+            .print-area .sw-weapon-box strong{color:#ffd966;}
+            .print-area .sw-skills-table{width:100%;border-collapse:collapse;font-size:.55rem;color:#f0f0f0;}
+            .print-area .sw-skills-table th{background:#1a2a33;color:#ffd966;padding:2px 4px;border:1px solid #3a6e8c;text-align:left;}
+            .print-area .sw-skills-table td{padding:2px 4px;border:1px solid #3a6e8c;}
+            .print-area .sw-skills-table tr:nth-child(even){background:#0f1a22;}
+            .print-area .sw-footer{text-align:center;margin-top:4px;padding-top:4px;border-top:1px dashed #3a6e8c;font-size:.55rem;color:#666;font-style:italic;}
+        }
+    </style>
+</head>
+<body>
+    <canvas id="starfield" aria-hidden="true"></canvas>
+    <div class="scanlines" aria-hidden="true"></div>
+    <div class="nebula neb-1" aria-hidden="true"></div>
+    <div class="nebula neb-2" aria-hidden="true"></div>
+    <div class="nebula neb-3" aria-hidden="true"></div>
+
+    <header class="app-header">
+        <h1>STAR WARS — SAGA EDITION</h1>
+        <p class="sub">Creador de Heroes — 18 Especies disponibles</p>
+        <div class="header-line" aria-hidden="true">
+            <span class="hline"></span>
+            <span class="hdiamond">◆</span>
+            <span class="hline"></span>
+        </div>
+    </header>
+
+    <main class="creator-wrap">
+        <!-- FORMULARIO -->
+        <div class="form-panel">
+            <!-- DATOS -->
+            <div class="form-card" style="animation-delay:0s">
+                <h3><i class="fas fa-id-card"></i> DATOS DEL PERSONAJE</h3>
+                <div class="field">
+                    <label for="charName">Nombre</label>
+                    <input type="text" id="charName" placeholder="Ej: Kael Jarrus" value="Jyn Kessla">
+                </div>
+                <div class="field">
+                    <label for="species">Especie</label>
+                    <select id="species"></select>
+                    <div id="speciesInfo" class="species-info"></div>
+                </div>
+                <div class="field">
+                    <label for="classType">Clase</label>
+                    <select id="classType"></select>
+                    <div id="classInfoBox" class="class-info"></div>
+                </div>
+                <div class="field">
+                    <label for="level">Nivel</label>
+                    <div class="level-row">
+                        <input type="number" id="level" min="1" max="20" value="3">
+                        <button class="btn btn-green btn-sm" id="levelUpBtn"><i class="fas fa-arrow-up"></i> +1</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARACTERÍSTICAS -->
+            <div class="form-card" style="animation-delay:.07s">
+                <h3><i class="fas fa-dna"></i> CARACTERISTICAS</h3>
+                <div class="points-box">
+                    <div>Puntos: <span class="pts-num" id="availablePoints">0/0</span></div>
+                    <div class="pts-warn" id="pointsWarning"></div>
+                </div>
+                <div class="attr-grid">
+                    <div class="field"><label for="fue">Fuerza</label><input type="number" id="fue" min="8" max="18" value="10"></div>
+                    <div class="field"><label for="des">Destreza</label><input type="number" id="des" min="8" max="18" value="10"></div>
+                    <div class="field"><label for="con">Constitucion</label><input type="number" id="con" min="8" max="18" value="10"></div>
+                    <div class="field"><label for="int">Inteligencia</label><input type="number" id="int" min="8" max="18" value="10"></div>
+                    <div class="field"><label for="sab">Sabiduria</label><input type="number" id="sab" min="8" max="18" value="10"></div>
+                    <div class="field"><label for="car">Carisma</label><input type="number" id="car" min="8" max="18" value="10"></div>
+                </div>
+                <div class="mod-ref">
+                    <table>
+                        <tr><td>8:-1</td><td>9:-1</td><td>10:0</td><td>11:0</td><td>12:+1</td><td>13:+1</td><td>14:+2</td><td>15:+2</td><td>16:+3</td><td>17:+3</td><td>18:+4</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- FOTO -->
+            <div class="form-card" style="animation-delay:.14s">
+                <h3><i class="fas fa-camera"></i> FOTO DEL PERSONAJE</h3>
+                <div class="field">
+                    <label for="photoUrl">URL de la imagen (opcional)</label>
+                    <input type="url" id="photoUrl" placeholder="https://ejemplo.com/foto.jpg" value="">
+                    <div class="hint">Deja en blanco para usar un placeholder.</div>
+                </div>
+            </div>
+
+            <!-- HABILIDADES -->
+            <div class="form-card" style="animation-delay:.21s">
+                <h3><i class="fas fa-book-open"></i> HABILIDADES</h3>
+                <div class="skill-header">
+                    <div class="skill-counter">Entrenadas: <span id="trainedCount">0</span> / <span id="maxSkills">4</span></div>
+                    <div class="skill-btns">
+                        <button class="btn btn-green btn-sm" id="learnSkillBtn"><i class="fas fa-plus"></i> Aprender</button>
+                        <button class="btn btn-red btn-sm" id="unlearnSkillBtn"><i class="fas fa-minus"></i> Desaprender</button>
+                    </div>
+                </div>
+                <div id="skillListContainer" class="skill-list" role="group" aria-label="Lista de habilidades"></div>
+            </div>
+
+            <!-- DOTES Y TALENTOS -->
+            <div class="form-card" style="animation-delay:.28s">
+                <h3><i class="fas fa-bolt"></i> DOTES Y TALENTOS</h3>
+                <div class="ft-grid">
+                    <div class="field">
+                        <label for="featSelect">Dote</label>
+                        <select id="featSelect"></select>
+                        <div class="effect-desc" id="featEffect"></div>
+                    </div>
+                    <div class="field">
+                        <label for="talentSelect">Talento</label>
+                        <select id="talentSelect"></select>
+                        <div class="effect-desc" id="talentEffect"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ARMA -->
+            <div class="form-card" style="animation-delay:.35s">
+                <h3><i class="fas fa-crosshairs"></i> ARMA PRINCIPAL</h3>
+                <div class="field">
+                    <label for="weapon">Selecciona arma</label>
+                    <select id="weapon">
+                        <option>Sable de luz (2d8)</option>
+                        <option>Blaster pesado (3d8)</option>
+                        <option>Rifle blaster (3d8)</option>
+                        <option>Blaster ligero (3d4)</option>
+                        <option>Pistola blaster (2d6)</option>
+                        <option>Rifle de precision (3d10)</option>
+                        <option>Lanzallamas (4d6, area)</option>
+                        <option>Granada (4d6, area)</option>
+                        <option>Vibroespada (2d6)</option>
+                        <option>Baston de combate (1d8)</option>
+                        <option>Doble sable de luz (2d8, dos manos)</option>
+                        <option>Sable shoto (2d6, ligero)</option>
+                        <option>Blaster de iones (3d6, dano a sistemas)</option>
+                        <option>Rifle de repeticion (3d8, automatico)</option>
+                        <option>Pistola de clavos (2d4)</option>
+                        <option>Arco laser (2d10, carga)</option>
+                        <option>Canon de protones (4d10, pesado)</option>
+                        <option>Lanzatorpedos (6d6, area)</option>
+                        <option>Espada larga (1d10)</option>
+                        <option>Daga (1d4)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- ACCIONES -->
+            <div class="form-card" style="animation-delay:.42s">
+                <h3><i class="fas fa-floppy-disk"></i> GUARDAR / EXPORTAR</h3>
+                <div class="action-bar">
+                    <button class="btn btn-yellow" id="saveCharBtn"><i class="fas fa-save"></i> Guardar</button>
+                    <button class="btn btn-cyan" id="loadCharBtn"><i class="fas fa-folder-open"></i> Cargar</button>
+                    <button class="btn btn-cyan" id="pdfBtn"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+                    <button class="btn btn-green" id="htmlBtn"><i class="fas fa-code"></i> Exportar HTML</button>
+                </div>
+                <div class="saved-box">
+                    <strong><i class="fas fa-database"></i> Guardados:</strong>
+                    <div id="savedList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA PREVIA -->
+        <aside class="preview-panel" aria-label="Vista previa del personaje">
+            <div class="preview-title"><i class="fas fa-scroll"></i> FICHA DE PERSONAJE</div>
+            <div id="characterDisplay">
+                <div class="char-card" id="pdfCard">
+                    <div class="cc-name" id="dispName">Jyn Kessla</div>
+                    <div class="cc-badges" id="dispBadges"></div>
+                    <div class="cc-species-mod" id="dispSpeciesMods"></div>
+                    <div class="cc-stats" id="statsGrid"></div>
+                    <hr class="cc-divider">
+                    <div class="cc-row"><strong>Dote:</strong> <span id="dispFeat"></span></div>
+                    <div class="cc-effect" id="dispFeatEffect"></div>
+                    <div class="cc-row"><strong>Talento:</strong> <span id="dispTal"></span></div>
+                    <div class="cc-effect" id="dispTalEffect"></div>
+                    <hr class="cc-divider">
+                    <div class="cc-hp">
+                        <div class="hp-label">Puntos de Golpe</div>
+                        <div class="hp-val" id="dispHP">36</div>
+                    </div>
+                    <div class="cc-defenses">
+                        <div class="cc-def"><div class="cd-label">Reflejos</div><div class="cd-val" id="dispRef">17</div></div>
+                        <div class="cc-def"><div class="cd-label">Fortaleza</div><div class="cd-val" id="dispFort">16</div></div>
+                        <div class="cc-def"><div class="cd-label">Voluntad</div><div class="cd-val" id="dispWill">15</div></div>
+                    </div>
+                    <hr class="cc-divider">
+                    <div class="cc-weapon" id="dispWeapon"><strong>Arma:</strong> Sable de luz (2d8)</div>
+                    <hr class="cc-divider">
+                    <div class="cc-skills-title"><strong>Habilidades entrenadas:</strong></div>
+                    <div class="cc-skills-list" id="dispSkillsList"></div>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+
+    <script>
+    /* ============================================================
+       FONDO ESTELAR
+    ============================================================ */
+    (function(){
+        const c=document.getElementById('starfield'),x=c.getContext('2d');
+        let s=[];const N=200;
+        function rz(){c.width=innerWidth;c.height=innerHeight;}
+        function mk(){s=[];for(let i=0;i<N;i++)s.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.3+.2,b:Math.random()*.5+.2,sp:Math.random()*.012+.003,ph:Math.random()*Math.PI*2});}
+        function dr(t){x.clearRect(0,0,c.width,c.height);for(const p of s){const f=Math.sin(t*p.sp+p.ph)*.3+.7;x.beginPath();x.arc(p.x,p.y,Math.max(.1,p.r),0,Math.PI*2);x.fillStyle=`rgba(190,210,255,${p.b*f})`;x.fill();}requestAnimationFrame(dr);}
+        rz();mk();requestAnimationFrame(dr);
+        window.addEventListener('resize',()=>{rz();mk();});
+    })();
+
+    /* ============================================================
+       BASE DE DATOS
+    ============================================================ */
+    const SPECIES_DATA={
+        "Humano":{mod:{cualquiera:2},desc:"Versatil y adaptable. Obtiene +2 a una caracteristica a tu eleccion."},
+        "Twi'lek":{mod:{CAR:2,SAB:-2},desc:"Exoticos y diplomaticos. Famosos por sus lekku y su habilidad social."},
+        "Wookiee":{mod:{FUE:4,DES:-2,CAR:-2},desc:"Guerreros peludos y leales. Inmensamente fuertes y temidos en combate."},
+        "Zabrak":{mod:{FUE:2,SAB:2},desc:"Independientes y resistentes. Con cuernos y fuerte conexion con la Fuerza."},
+        "Rodiano":{mod:{DES:2,SAB:-2},desc:"Agiles y nerviosos. Excelentes pilotos y rastreadores."},
+        "Miraluka":{mod:{SAB:2,CAR:-2},desc:"Videntes ciegos de la Fuerza. Perciben el mundo a traves de la Fuerza."},
+        "Bothan":{mod:{CAR:2,INT:2,FUE:-2},desc:"Espias y diplomaticos. Maestros de la politica y el espionaje."},
+        "Chiss":{mod:{CAR:2,INT:2,DES:-2},desc:"Estrategas de ojos rojos. Comandantes natos y metodicos."},
+        "Duros":{mod:{DES:2,INT:2,CAR:-2},desc:"Pilotos natos. Con piel azul y grandes ojos, navegantes excepcionales."},
+        "Mon Calamari":{mod:{INT:2,SAB:2,DES:-2},desc:"Estrategas e ingenieros. Grandes disenadores de naves y lideres."},
+        "Sullustan":{mod:{DES:2,INT:2,SAB:-2},desc:"Pilotos y tecnicos. Resistentes al calor y excelentes mecanicos."},
+        "Togruta":{mod:{SAB:2,CAR:2,CON:-2},desc:"Perceptivos y carismaticos. Con monturas (lekku) en la cabeza."},
+        "Trandoshan":{mod:{FUE:2,CON:2,CAR:-2},desc:"Cazadores escamosos. Ferozmente territoriales y excelentes rastreadores."},
+        "Kel Dor":{mod:{SAB:2,CAR:2,DES:-2},desc:"Sabios misticos. Usan mascarillas para sobrevivir en atmosferas normales."},
+        "Ithorian":{mod:{SAB:2,CAR:2,FUE:-2},desc:"Pacificos y sabios. Su cabeza en forma de martillo les da voz melodiosa."},
+        "Gand":{mod:{CON:2,SAB:2,CAR:-2},desc:"Estoicos y resistentes. Fisiologia basada en amoniaco les da gran resistencia."},
+        "Nautolan":{mod:{CAR:2,SAB:2,DES:-2},desc:"Empaticos y perceptivos. Anfibios con grandes ojos y tentaculos."},
+        "Devaronian":{mod:{FUE:2,CAR:2,SAB:-2},desc:"Impulsivos y carismaticos. Humanoides rojos con cuernos y gran energia."}
+    };
+
+    const CLASS_DATA={
+        "Jedi":{type:"hero",baseSkills:2,description:"Guerrero mistico del sable de luz y la Fuerza.",talents:["Deflexion de sable","Empujon de Fuerza","Control de Fuerza","Saber combativo"]},
+        "Noble":{type:"hero",baseSkills:4,description:"Lider carismatico, negociador y maestro de contactos.",talents:["Contactos","Inspiracion","Liderazgo","Finanzas"]},
+        "Picaro":{type:"hero",baseSkills:4,description:"Astuto, ladron, especialista en enganos y disparos certeros.",talents:["Golpe sucio","Suerte","Ataque furtivo","Astucia callejera"]},
+        "Explorador":{type:"hero",baseSkills:4,description:"Piloto, rastreador y experto en supervivencia.",talents:["Senuelo","Piloto nato","Rastreo","Sobrevivir"]},
+        "Soldado":{type:"hero",baseSkills:2,description:"Especialista en combate, armas pesadas y resistencia.",talents:["Armas pesadas","Estilo duro","Fuego de cobertura","Impacto letal"]},
+        "Ace Pilot":{type:"prestige",baseSkills:3,description:"Piloto de elite, maestro de maniobras estelares.",requirements:"Nivel 7+, Pilotar entrenado, Dote: Reflejos rapidos",talents:["Maniobra evasiva","Disparo en picada","Piloto legendario"]},
+        "Bounty Hunter":{type:"prestige",baseSkills:3,description:"Cazarrecompensas, experto en rastreo y combate.",requirements:"Nivel 7+, Supervivencia entrenado, Dote: Competencia con armas",talents:["Rastreo implacable","Disparo letal","Captura viva"]},
+        "Crime Lord":{type:"prestige",baseSkills:4,description:"Senor del crimen, maestro de la influencia y el engano.",requirements:"Nivel 7+, Enganar entrenado, Persuadir entrenado",talents:["Red de contactos","Intimidacion","Orden de silencio"]},
+        "Elite Trooper":{type:"prestige",baseSkills:2,description:"Soldado de elite, experto en armaduras y armas avanzadas.",requirements:"Nivel 7+, Fortaleza indomable, Dote: Competencia con armas",talents:["Armadura mejorada","Fuego supremo","Resistencia"]},
+        "Force Adept":{type:"prestige",baseSkills:3,description:"Adepto de la Fuerza sin ser Jedi, maestro de poderes.",requirements:"Nivel 7+, Usar la Fuerza entrenado, Dote: Fuerza Sensible",talents:["Control de energia","Vision de la Fuerza","Sanacion"]},
+        "Force Disciple":{type:"prestige",baseSkills:3,description:"Discipulo de la Fuerza, casi un maestro.",requirements:"Nivel 10+, Usar la Fuerza entrenado, Talento: Control de energia",talents:["Maestria de Fuerza","Persuasion mistica","Iluminacion"]},
+        "Gunslinger":{type:"prestige",baseSkills:3,description:"Pistolero, el mas rapido del sector.",requirements:"Nivel 7+, Destreza 15+, Dote: Doble empuñadura",talents:["Disparo rapido","Desenfunde rapido","Disparo preciso"]},
+        "Jedi Knight":{type:"prestige",baseSkills:2,description:"Caballero Jedi, guerrero de la luz.",requirements:"Nivel 7+, Usar la Fuerza entrenado, Talento: Deflexion de sable",talents:["Sable de luz maestro","Ataque de Fuerza","Sentido ampliado"]},
+        "Jedi Master":{type:"prestige",baseSkills:2,description:"Maestro Jedi, cumbre del camino de la luz.",requirements:"Nivel 12+, Ser Caballero Jedi, Usar la Fuerza entrenado",talents:["Maestria de sable","Control total de Fuerza","Sabiduria ancestral"]},
+        "Officer":{type:"prestige",baseSkills:4,description:"Oficial militar, estratega y lider de tropas.",requirements:"Nivel 7+, Persuadir entrenado, Dote: Liderazgo",talents:["Orden de batalla","Motivar tropas","Tactica avanzada"]},
+        "Sith Apprentice":{type:"prestige",baseSkills:2,description:"Aprendiz Sith, iniciado en el lado oscuro.",requirements:"Nivel 7+, Usar la Fuerza entrenado, Talento: Empujon de Fuerza",talents:["Rafaga de odio","Sable oscuro","Control de dolor"]},
+        "Sith Lord":{type:"prestige",baseSkills:2,description:"Senor Sith, maestro del lado oscuro.",requirements:"Nivel 12+, Ser Aprendiz Sith, Usar la Fuerza entrenado",talents:["Tormenta de Fuerza","Dominio mental","Inmortalidad oscura"]}
+    };
+
+    const FEATS=[
+        {name:"Punteria precisa",effect:"Ignora cobertura parcial al disparar.",modifier:""},
+        {name:"Doble empuñadura",effect:"Permite disparar dos armas ligeras con penalizacion -5 a cada mano.",modifier:"-5"},
+        {name:"Combate con dos armas",effect:"Permite usar dos armas cuerpo a cuerpo con penalizacion -5 a cada ataque.",modifier:"-5"},
+        {name:"Competencia con armas",effect:"Puedes usar armas avanzadas sin penalizacion.",modifier:""},
+        {name:"Reflejos rapidos",effect:"Obtienes +2 a tus tiradas de Iniciativa.",modifier:"+2 Iniciativa"},
+        {name:"Fortaleza indomable",effect:"Obtienes +2 a tu Defensa de Fortaleza.",modifier:"+2 Fortaleza"},
+        {name:"Liderazgo",effect:"Puedes dar ordenes y tus aliados ganan +1 a ataque.",modifier:"+1 ataque aliados"},
+        {name:"Fuerza Sensible",effect:"Te permite usar la habilidad Usar la Fuerza aunque no seas Jedi.",modifier:""}
+    ];
+
+    const ALL_SKILLS=[
+        {name:"Acrobacias",attr:"DES"},{name:"Conocimiento (cualquier)",attr:"INT"},
+        {name:"Enganar",attr:"CAR"},{name:"Iniciativa",attr:"DES"},
+        {name:"Intimidar",attr:"CAR"},{name:"Mecanica",attr:"INT"},
+        {name:"Oficio",attr:"INT"},{name:"Percepcion",attr:"SAB"},
+        {name:"Persuadir",attr:"CAR"},{name:"Pilotar",attr:"DES"},
+        {name:"Saber (galactico)",attr:"INT"},{name:"Sigilo",attr:"DES"},
+        {name:"Supervivencia",attr:"SAB"},{name:"Trato con animales",attr:"CAR"},
+        {name:"Trepar",attr:"FUE"},{name:"Usar la Fuerza",attr:"CAR"},
+        {name:"Ciencias",attr:"INT"}
+    ];
+
+    /* ============================================================
+       ESTADO
+    ============================================================ */
+    const PUNTOS_BASE=25;
+    const costoStats={8:0,9:1,10:2,11:3,12:4,13:5,14:6,15:8,16:10,17:13,18:16};
+    let trainedSkills=[];
+    let currentFeat=FEATS[0];
+    let currentTalent=null;
+
+    /* ============================================================
+       ELEMENTOS DOM
+    ============================================================ */
+    const $=id=>document.getElementById(id);
+    const fue=$('fue'),des=$('des'),con=$('con'),int=$('int'),sab=$('sab'),car=$('car');
+    const charName=$('charName'),species=$('species'),classType=$('classType'),level=$('level');
+    const weapon=$('weapon'),photoUrl=$('photoUrl');
+
+    /* ============================================================
+       AUXILIARES
+    ============================================================ */
+    function getCosto(v){return costoStats[v]||0;}
+    function getPuntosMax(){return PUNTOS_BASE+Math.floor((parseInt(level.value)||1)/2);}
+    function calcPuntosUsados(){return getCosto(+fue.value)+getCosto(+des.value)+getCosto(+con.value)+getCosto(+int.value)+getCosto(+sab.value)+getCosto(+car.value);}
+    function getMod(v){return Math.floor((v-10)/2);}
+    function getAttr(n){const m={FUE:fue,DES:des,CON:con,INT:int,SAB:sab,CAR:car};return parseInt(m[n].value)||10;}
+    function getCls(n){return CLASS_DATA[n]||CLASS_DATA["Explorador"];}
+    function getMaxSkills(){const d=getCls(classType.value),lv=parseInt(level.value)||1;return Math.min(d.baseSkills+Math.floor((lv-1)/2),ALL_SKILLS.length);}
+
+    /* ============================================================
+       ESPECIES
+    ============================================================ */
+    function populateSpecies(){
+        species.innerHTML='';
+        Object.keys(SPECIES_DATA).forEach(sp=>{const o=document.createElement('option');o.value=sp;o.textContent=sp;species.appendChild(o);});
+        species.value='Humano';
+        species.addEventListener('change',()=>{updateSpeciesInfo();updateAll();});
+        updateSpeciesInfo();
+    }
+    function updateSpeciesInfo(){
+        const d=SPECIES_DATA[species.value],box=$('speciesInfo');
+        if(!d){box.innerHTML='';return;}
+        const e=Object.entries(d.mod);
+        let mt=e.length===1&&e[0][0]==='cualquiera'?'+2 a una caracteristica a eleccion':e.map(([k,v])=>`${k} ${v>0?'+':''}${v}`).join(', ');
+        box.innerHTML=`${d.desc} <span class="sp-mod">(Modificadores: ${mt})</span>`;
+    }
+    function getSpeciesModText(){
+        const d=SPECIES_DATA[species.value];if(!d)return'';
+        const e=Object.entries(d.mod);
+        return e.length===1&&e[0][0]==='cualquiera'?'+2 a elegir':e.map(([k,v])=>`${k} ${v>0?'+':''}${v}`).join(', ');
+    }
+
+    /* ============================================================
+       CLASES
+    ============================================================ */
+    function populateClasses(){
+        classType.innerHTML='';
+        const gh=document.createElement('optgroup');gh.label='Clases Heroe';
+        const gp=document.createElement('optgroup');gp.label='Clases de Prestigio';
+        Object.entries(CLASS_DATA).forEach(([k,v])=>{const o=document.createElement('option');o.value=k;o.textContent=k;(v.type==='hero'?gh:gp).appendChild(o);});
+        classType.appendChild(gh);classType.appendChild(gp);
+        classType.value='Explorador';
+        classType.addEventListener('change',()=>{updateClassInfo();populateTalents();updateAll();});
+        updateClassInfo();populateTalents();
+    }
+    function updateClassInfo(){
+        const d=getCls(classType.value),box=$('classInfoBox');
+        const tl=d.type==='hero'?'Heroe':'Prestigio',tb=d.type==='hero'?'hero':'prestige';
+        let h=`<span class="type-badge ${tb}">${tl}</span><span style="color:#fff;">${d.description}</span>`;
+        if(d.type==='prestige'&&d.requirements)h+=`<div class="req"><strong>Requisitos:</strong> ${d.requirements}</div>`;
+        h+=`<div class="base-sk"><strong>Habilidades base:</strong> ${d.baseSkills}</div>`;
+        box.innerHTML=h;
+    }
+
+    /* ============================================================
+       HABILIDADES
+    ============================================================ */
+    function renderSkills(){
+        const c=$('skillListContainer');c.innerHTML='';
+        const lv=parseInt(level.value)||1;
+        ALL_SKILLS.forEach(sk=>{
+            const tr=trainedSkills.includes(sk.name);
+            const av=getAttr(sk.attr),mod=getMod(av),tot=lv+mod+(tr?5:0);
+            const d=document.createElement('div');d.className='sk-item';
+            const cb=document.createElement('input');cb.type='checkbox';cb.checked=tr;cb.id='sk_'+sk.name.replace(/\s/g,'_');
+            cb.addEventListener('change',function(){
+                if(this.checked){if(trainedSkills.length>=getMaxSkills()){showToast('Maximo de habilidades alcanzado');this.checked=false;return;}if(!trainedSkills.includes(sk.name))trainedSkills.push(sk.name);}
+                else{const i=trainedSkills.indexOf(sk.name);if(i!==-1)trainedSkills.splice(i,1);}
+                updateAll();
+            });
+            const lb=document.createElement('label');lb.htmlFor=cb.id;lb.textContent=sk.name;
+            const ms=document.createElement('span');ms.className='sk-mod';ms.textContent=`+${tot}`;
+            d.appendChild(cb);d.appendChild(lb);d.appendChild(ms);c.appendChild(d);
+        });
+        $('trainedCount').textContent=trainedSkills.length;
+        $('maxSkills').textContent=getMaxSkills();
+    }
+
+    /* ============================================================
+       DOTES Y TALENTOS
+    ============================================================ */
+    function populateFeats(){
+        const s=$('featSelect');s.innerHTML='';
+        FEATS.forEach((f,i)=>{const o=document.createElement('option');o.value=i;o.textContent=f.name;s.appendChild(o);});
+        s.addEventListener('change',function(){currentFeat=FEATS[+this.value];$('featEffect').textContent=currentFeat.effect+(currentFeat.modifier?` (${currentFeat.modifier})`:'');updateAll();});
+        currentFeat=FEATS[0];$('featEffect').textContent=currentFeat.effect+(currentFeat.modifier?` (${currentFeat.modifier})`:'');
+    }
+    function populateTalents(){
+        const t=getCls(classType.value).talents||[],s=$('talentSelect');s.innerHTML='';
+        t.forEach((tn,i)=>{const o=document.createElement('option');o.value=i;o.textContent=tn;s.appendChild(o);});
+        if(t.length){s.value=0;currentTalent={name:t[0],effect:'Talento de clase'};$('talentEffect').textContent=t[0]+' (Talento de clase)';}
+        else{currentTalent=null;$('talentEffect').textContent='Sin talentos disponibles.';}
+        s.onchange=function(){const tl=getCls(classType.value).talents||[];if(tl.length&&+this.value>=0&&+this.value<tl.length){currentTalent={name:tl[+this.value],effect:'Talento de clase'};$('talentEffect').textContent=tl[+this.value]+' (Talento de clase)';}else{currentTalent=null;$('talentEffect').textContent='Sin talento.';}updateAll();};
+    }
+
+    /* ============================================================
+       CALCULOS
+    ============================================================ */
+    function applySpeciesMods(base,sp){
+        const m={...base},d=SPECIES_DATA[sp];if(!d||sp==='Humano')return m;
+        const mods=d.mod;
+        ['FUE','DES','CON','INT','SAB','CAR'].forEach(k=>{const lk=k.toLowerCase();if(mods[k])m[lk]=Math.min(18,Math.max(3,m[lk]+mods[k]));});
+        return m;
+    }
+    function calcStats(){
+        const lv=parseInt(level.value)||1,cls=classType.value,sp=species.value;
+        const base={fue:+fue.value,des:+des.value,con:+con.value,int:+int.value,sab:+sab.value,car:+car.value};
+        const fin=applySpeciesMods(base,sp);
+        const mF=getMod(fin.fue),mD=getMod(fin.des),mC=getMod(fin.con),mI=getMod(fin.int),mS=getMod(fin.sab),mCa=getMod(fin.car);
+        let bhp=24;
+        if(cls==='Jedi'||cls==='Elite Trooper'||cls==='Jedi Knight'||cls==='Jedi Master'||cls==='Sith Apprentice'||cls==='Sith Lord')bhp=30;
+        if(cls==='Soldado')bhp=36;
+        let hp=bhp+(mC*lv)+((lv-1)*5);
+        if(cls==='Soldado'||cls==='Elite Trooper')hp=36+(mC*lv)+((lv-1)*6);
+        let ref=10+lv+mD,fort=10+lv+mC,will=10+lv+mS;
+        if(currentFeat&&currentFeat.name==='Fortaleza indomable')fort+=2;
+        if(currentFeat&&currentFeat.name==='Reflejos rapidos')ref+=2;
+        return{hp:Math.max(10,hp),ref,fort,will,mF,mD,mC,mI,mS,mCa,fin,lv,cls};
+    }
+
+    /* ============================================================
+       ACTUALIZAR PANTALLA
+    ============================================================ */
+    function updatePoints(){
+        const mx=getPuntosMax(),us=calcPuntosUsados(),rest=mx-us;
+        $('availablePoints').textContent=`${rest} / ${mx}`;
+        const w=$('pointsWarning');
+        if(rest<0){w.textContent='Excediste los puntos';w.className='pts-warn pts-over';}
+        else if(rest===0){w.textContent='Puntos exactos';w.className='pts-warn pts-ok';}
+        else{w.textContent=`Quedan ${rest} puntos`;w.className='pts-warn pts-left';}
+        return rest;
+    }
+
+    function updateAll(){
+        if(updatePoints()<0){renderSkills();return;}
+        const c=calcStats();
+
+        /* Nombre */
+        $('dispName').textContent=charName.value||'Sin nombre';
+
+        /* Badges */
+        const cd=getCls(classType.value);
+        let bh=`<span class="cc-badge ${cd.type==='prestige'?'prestige-b':'class-b'}">${classType.value}</span>`;
+        bh+=`<span class="cc-badge species-b">${species.value}</span>`;
+        bh+=`<span class="cc-badge level-b">Nvl ${level.value}</span>`;
+        $('dispBadges').innerHTML=bh;
+
+        /* Species mods */
+        $('dispSpeciesMods').textContent='Bonus: '+getSpeciesModText();
+
+        /* Stats grid */
+        const attrs=[
+            {n:'FUE',v:c.fin.fue,m:c.mF},{n:'DES',v:c.fin.des,m:c.mD},{n:'CON',v:c.fin.con,m:c.mC},
+            {n:'INT',v:c.fin.int,m:c.mI},{n:'SAB',v:c.fin.sab,m:c.mS},{n:'CAR',v:c.fin.car,m:c.mCa}
+        ];
+        $('statsGrid').innerHTML=attrs.map(a=>`<div class="cc-stat"><div class="cs-name">${a.n}</div><div class="cs-val">${a.v}</div><div class="cs-mod">${a.m>=0?'+':''}${a.m}</div></div>`).join('');
+
+        /* Feat */
+        $('dispFeat').textContent=currentFeat?currentFeat.name:'—';
+        $('dispFeatEffect').textContent=currentFeat?currentFeat.effect+(currentFeat.modifier?` (${currentFeat.modifier})`:''):'';
+
+        /* Talent */
+        $('dispTal').textContent=currentTalent?currentTalent.name:'—';
+        $('dispTalEffect').textContent=currentTalent?currentTalent.name+' (Talento de clase)':'Sin talento';
+
+        /* HP y defensas */
+        $('dispHP').textContent=c.hp;
+        $('dispRef').textContent=c.ref;
+        $('dispFort').textContent=c.fort;
+        $('dispWill').textContent=c.will;
+
+        /* Arma */
+        $('dispWeapon').innerHTML=`<strong>Arma:</strong> ${weapon.value}`;
+
+        /* Habilidades */
+        const lv=parseInt(level.value)||1;
+        if(trainedSkills.length===0){$('dispSkillsList').textContent='Ninguna';}
+        else{$('dispSkillsList').innerHTML=trainedSkills.map(sn=>{const sk=ALL_SKILLS.find(s=>s.name===sn);if(!sk)return sn;const m=getMod(getAttr(sk.attr));return `${sn} <span style="color:var(--text-muted);font-size:.78rem;">(+${lv+m+5})</span>`;}).join('<br>');}
+
+        renderSkills();
+    }
+
+    /* ============================================================
+       GUARDAR / CARGAR
+    ============================================================ */
+    function getCharData(){
+        return{
+            name:charName.value,species:species.value,classType:classType.value,level:level.value,
+            fue:fue.value,des:des.value,con:con.value,int:int.value,sab:sab.value,car:car.value,
+            skills:[...trainedSkills],feat:$('featSelect').value,talent:$('talentSelect').value,
+            weapon:weapon.value,photo:photoUrl.value
+        };
+    }
+    function loadCharData(d){
+        charName.value=d.name||'';species.value=d.species||'Humano';classType.value=d.classType||'Explorador';
+        level.value=d.level||1;fue.value=d.fue||10;des.value=d.des||10;con.value=d.con||10;
+        int.value=d.int||10;sab.value=d.sab||10;car.value=d.car||10;
+        trainedSkills=d.skills?[...d.skills]:[];
+        weapon.value=d.weapon||'Sable de luz (2d8)';photoUrl.value=d.photo||'';
+        updateSpeciesInfo();updateClassInfo();
+        $('featSelect').value=d.feat||0;currentFeat=FEATS[+(d.feat||0)];$('featEffect').textContent=currentFeat.effect+(currentFeat.modifier?` (${currentFeat.modifier})`:'');
+        populateTalents();if(d.talent!=null)$('talentSelect').value=d.talent;
+        updateAll();
+    }
+    function renderSaved(){
+        const list=$('savedList');list.innerHTML='';
+        const saved=JSON.parse(localStorage.getItem('sw_chars')||'[]');
+        if(!saved.length){list.innerHTML='<div style="color:var(--text-muted);font-size:.82rem;padding:6px 0;">No hay personajes guardados.</div>';return;}
+        saved.forEach((ch,i)=>{
+            const d=document.createElement('div');d.className='saved-item';
+            d.innerHTML=`<div><div class="si-name">${ch.name||'Sin nombre'}</div><div class="si-info">${ch.species} ${ch.classType} Nvl${ch.level}</div></div>`;
+            const btn=document.createElement('button');btn.className='si-del';btn.innerHTML='<i class="fas fa-trash"></i>';btn.title='Eliminar';
+            btn.addEventListener('click',e=>{e.stopPropagation();saved.splice(i,1);localStorage.setItem('sw_chars',JSON.stringify(saved));renderSaved();showToast('Personaje eliminado');});
+            d.appendChild(btn);
+            d.style.cursor='pointer';d.addEventListener('click',()=>{loadCharData(ch);showToast('Personaje cargado');});
+            list.appendChild(d);
+        });
+    }
+
+    /* ============================================================
+       EXPORTAR PDF (impresion)
+    ============================================================ */
+    function generatePrintHTML(){
+        const c=calcStats(),cd=getCls(classType.value),nm=charName.value||'Sin nombre',sp=species.value,lv=level.value;
+        const attrs=[{n:'FUE',v:c.fin.fue,m:c.mF},{n:'DES',v:c.fin.des,m:c.mD},{n:'CON',v:c.fin.con,m:c.mC},{n:'INT',v:c.fin.int,m:c.mI},{n:'SAB',v:c.fin.sab,m:c.mS},{n:'CAR',v:c.fin.car,m:c.mCa}];
+        const photoSrc=photoUrl.value;
+        const photoHTML=photoSrc?`<img src="${photoSrc}" alt="Foto de ${nm}" onerror="this.parentElement.innerHTML='Sin foto'">`:'<div class="sw-photo-placeholder">Sin foto</div>';
+        const pBadge=cd.type==='prestige'?' prestige':'';
+        let skillsRows=trainedSkills.map(sn=>{const sk=ALL_SKILLS.find(s=>s.name===sn);if(!sk)return`<tr><td>${sn}</td><td>—</td><td>+${lv+5}</td></tr>`;const m=getMod(getAttr(sk.attr));return`<tr><td>${sn}</td><td>${sk.attr}</td><td>+${lv+m+5}</td></tr>`;}).join('');
+        if(!skillsRows)skillsRows='<tr><td colspan="3" style="text-align:center;color:#555;">Ninguna</td></tr>';
+
+        return `<div class="print-area"><div class="sw-card">
+            <div class="sw-left">
+                <div class="sw-photo">${photoHTML}</div>
+                <div style="text-align:center;"><span class="sw-badge${pBadge}">${classType.value}</span></div>
+                <div style="text-align:center;font-size:.7rem;color:#aaccff;">Nivel ${lv}</div>
+                <div class="sw-species-mod">${sp} — ${getSpeciesModText()}</div>
+            </div>
+            <div class="sw-right">
+                <div class="sw-header">
+                    <h1>STAR WARS SAGA EDITION</h1>
+                    <h2>${nm}</h2>
+                    <div class="subtitle">${sp} ${classType.value} Nivel ${lv}</div>
+                </div>
+                <div class="sw-stats">${attrs.map(a=>`<div class="sw-stat">${a.n}: <span>${a.v}</span> (${a.m>=0?'+':''}${a.m})</div>`).join('')}</div>
+                <div class="sw-hp">PG: ${c.hp}</div>
+                <div class="sw-defenses"><div>REF: ${c.ref}</div><div>FORT: ${c.fort}</div><div>VOL: ${c.will}</div></div>
+                <div class="sw-combat">
+                    <div><strong>Dote:</strong> ${currentFeat?currentFeat.name:'—'}</div>
+                    <div><strong>Talento:</strong> ${currentTalent?currentTalent.name:'—'}</div>
+                </div>
+                <div class="sw-feat-talent">
+                    <div><strong>Efecto dote:</strong><br><span>${currentFeat?currentFeat.effect:'—'}</span></div>
+                    <div><strong>Efecto talento:</strong><br><span>${currentTalent?currentTalent.effect:'—'}</span></div>
+                </div>
+                <div class="sw-weapon-box"><strong>Arma:</strong> ${weapon.value}</div>
+                <table class="sw-skills-table"><thead><tr><th>Habilidad</th><th>Atrib.</th><th>Total</th></tr></thead><tbody>${skillsRows}</tbody></table>
+                <div class="sw-footer">"Que la Fuerza te acompane" — Generado con Creador de Heroes SW Saga</div>
+            </div>
+        </div></div>`;
+    }
+
+    function exportPDF(){
+        const old=document.querySelector('.print-area');
+        if(old)old.remove();
+        const div=document.createElement('div');div.innerHTML=generatePrintHTML();
+        document.body.appendChild(div.firstElementChild);
+        showToast('Abriendo dialogo de impresion...');
+        setTimeout(()=>{window.print();setTimeout(()=>{const pa=document.querySelector('.print-area');if(pa)pa.remove();},500);},400);
+    }
+
+    /* ============================================================
+       EXPORTAR HTML
+    ============================================================ */
+    function exportHTML(){
+        const c=calcStats(),cd=getCls(classType.value),nm=charName.value||'Sin nombre',sp=species.value,lv=level.value;
+        const photoSrc=photoUrl.value;
+        const attrs=[{n:'FUE',v:c.fin.fue,m:c.mF},{n:'DES',v:c.fin.des,m:c.mD},{n:'CON',v:c.fin.con,m:c.mC},{n:'INT',v:c.fin.int,m:c.mI},{n:'SAB',v:c.fin.sab,m:c.mS},{n:'CAR',v:c.fin.car,m:c.mCa}];
+        const photoHTML=photoSrc?`<img src="${photoSrc}" alt="Foto" style="width:100%;border-radius:14px;">`:'<p style="text-align:center;color:#555;">Sin foto</p>';
+        let skillsHTML=trainedSkills.map(sn=>{const sk=ALL_SKILLS.find(s=>s.name===sn);if(!sk)return`<li>${sn}</li>`;const m=getMod(getAttr(sk.attr));return`<li>${sn} (ATR: ${sk.attr}, Total: +${lv+m+5})</li>`;}).join('');
+        if(!skillsHTML)skillsHTML='<li>Ninguna</li>';
+
+        const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${nm} — SW Saga</title><style>body{background:#0a0f1e;color:#f0f0f0;font-family:sans-serif;max-width:700px;margin:0 auto;padding:20px;}h1{color:#ffe81f;text-align:center;}h2{color:#ffd966;border-left:4px solid #ffd966;padding-left:12px;}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:#0f1a22;padding:10px;border-radius:12px;margin:12px 0;}.stat{text-align:center;background:#1a2a33;padding:8px;border-radius:8px;}.stat .v{color:#ffd966;font-size:1.2rem;font-weight:bold;}.defenses{display:flex;justify-content:space-around;background:#031016;padding:10px;border-radius:12px;margin:12px 0;}.hp{text-align:center;background:#031016;padding:10px;border-radius:12px;margin:12px 0;font-size:1.3rem;font-weight:bold;color:#ff4757;}ul{padding-left:20px;line-height:1.8;}.badge{display:inline-block;padding:3px 12px;border-radius:20px;background:#2c5a6e;font-weight:bold;font-size:.8rem;margin:4px 2px;}.footer{text-align:center;margin-top:20px;color:#666;font-style:italic;}</style></head><body>
+        <h1>STAR WARS — SAGA EDITION</h1>
+        <h2>${nm}</h2>
+        <div><span class="badge">${classType.value}</span><span class="badge">${sp}</span><span class="badge">Nvl ${lv}</span></div>
+        <p style="color:#88ddff;font-size:.85rem;">Bonus especie: ${getSpeciesModText()}</p>
+        ${photoHTML}
+        <div class="stats">${attrs.map(a=>`<div class="stat"><div>${a.n}</div><div class="v">${a.v} (${a.m>=0?'+':''}${a.m})</div></div>`).join('')}</div>
+        <div class="hp">PG: ${c.hp}</div>
+        <div class="defenses"><div>Reflejos: ${c.ref}</div><div>Fortaleza: ${c.fort}</div><div>Voluntad: ${c.will}</div></div>
+        <p><strong>Dote:</strong> ${currentFeat?currentFeat.name:'—'} — ${currentFeat?currentFeat.effect:'—'}</p>
+        <p><strong>Talento:</strong> ${currentTalent?currentTalent.name:'—'} — ${currentTalent?currentTalent.effect:'—'}</p>
+        <p><strong>Arma:</strong> ${weapon.value}</p>
+        <h3>Habilidades entrenadas:</h3><ul>${skillsHTML}</ul>
+        <div class="footer">"Que la Fuerza te acompane"</div></body></html>`;
+
+        const blob=new Blob([html],{type:'text/html'});
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');a.href=url;a.download=`${nm.replace(/\s+/g,'_')}_SW_Saga.html`;
+        document.body.appendChild(a);a.click();document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('HTML descargado');
+    }
+
+    /* ============================================================
+       TOAST
+    ============================================================ */
+    let toastTimer;
+    function showToast(msg){
+        const t=$('toast');clearTimeout(toastTimer);
+        t.textContent=msg;t.classList.add('show');
+        toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
+    }
+
+    /* ============================================================
+       EVENTOS
+    ============================================================ */
+    [fue,des,con,int,sab,car].forEach(el=>{
+        el.addEventListener('input',()=>{let v=parseInt(el.value);if(isNaN(v))return;v=Math.max(8,Math.min(18,v));el.value=v;updateAll();});
+    });
+    level.addEventListener('input',()=>{let v=parseInt(level.value);if(isNaN(v))return;v=Math.max(1,Math.min(20,v));level.value=v;updateAll();});
+    charName.addEventListener('input',updateAll);
+    weapon.addEventListener('change',updateAll);
+    photoUrl.addEventListener('input',updateAll);
+
+    $('levelUpBtn').addEventListener('click',()=>{
+        let v=parseInt(level.value)||1;if(v<20){level.value=v+1;updateAll();showToast('Nivel '+level.value);}
+    });
+
+    $('learnSkillBtn').addEventListener('click',()=>{
+        if(trainedSkills.length>=getMaxSkills()){showToast('Maximo de habilidades alcanzado');return;}
+        const untrained=ALL_SKILLS.find(s=>!trainedSkills.includes(s.name));
+        if(untrained){trainedSkills.push(untrained.name);updateAll();showToast(untrained.name+' aprendida');}
+        else showToast('Todas las habilidades ya estan entrenadas');
+    });
+
+    $('unlearnSkillBtn').addEventListener('click',()=>{
+        if(!trainedSkills.length){showToast('No hay habilidades para desaprender');return;}
+        const rem=trainedSkills.pop();updateAll();showToast(rem+' desaprendida');
+    });
+
+    $('saveCharBtn').addEventListener('click',()=>{
+        if(!charName.value.trim()){showToast('Escribe un nombre para el personaje');return;}
+        const saved=JSON.parse(localStorage.getItem('sw_chars')||'[]');
+        const idx=saved.findIndex(c=>c.name===charName.value.trim());
+        const data=getCharData();
+        if(idx!==-1)saved[idx]=data;else saved.push(data);
+        localStorage.setItem('sw_chars',JSON.stringify(saved));
+        renderSaved();showToast('Personaje guardado');
+    });
+
+    $('loadCharBtn').addEventListener('click',()=>{
+        const saved=JSON.parse(localStorage.getItem('sw_chars')||'[]');
+        if(!saved.length){showToast('No hay personajes guardados');return;}
+        loadCharData(saved[saved.length-1]);showToast('Ultimo personaje cargado');
+    });
+
+    $('pdfBtn').addEventListener('click',exportPDF);
+    $('htmlBtn').addEventListener('click',exportHTML);
+
+    /* ============================================================
+       INICIO
+    ============================================================ */
+    populateSpecies();
+    populateClasses();
+    populateFeats();
+    renderSaved();
+    updateAll();
+    </script>
+</body>
+</html>

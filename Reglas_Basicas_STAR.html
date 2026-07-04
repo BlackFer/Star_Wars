@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía Rápida de Combate — Star Wars Saga Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-deep: #050a15;
+            --bg-sidebar: rgba(6, 14, 28, 0.95);
+            --bg-panel: rgba(8, 20, 40, 0.6);
+            --bg-section-header: rgba(0, 180, 220, 0.07);
+            --accent-yellow: #FFE81F;
+            --accent-cyan: #00d4ff;
+            --accent-red: #ff4757;
+            --accent-green: #2ed573;
+            --accent-blue: #5b7fff;
+            --accent-orange: #ffa502;
+            --text-primary: #dce6f0;
+            --text-secondary: #8a9db0;
+            --text-muted: #4a5a6a;
+            --border-glow: rgba(0, 212, 255, 0.25);
+            --border-subtle: rgba(0, 212, 255, 0.1);
+            --sidebar-width: 260px;
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; scroll-padding-top: 50px; }
+
+        body {
+            background: var(--bg-deep);
+            font-family: 'Rajdhani', sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* === FONDO ESTELAR === */
+        #starfield {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+        }
+
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px);
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        .nebula {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            pointer-events: none;
+            z-index: -1;
+        }
+        .nebula-1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(20,0,80,0.4), transparent 70%); top: -150px; right: -100px; }
+        .nebula-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(0,40,80,0.3), transparent 70%); bottom: -100px; left: -80px; }
+        .nebula-3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(80,0,40,0.2), transparent 70%); top: 50%; left: 40%; transform: translate(-50%,-50%); }
+
+        /* === BARRA LATERAL === */
+        #sidebar {
+            position: fixed;
+            top: 0; left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-glow);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: transform 0.3s var(--ease);
+        }
+
+        .sidebar-header {
+            padding: 24px 20px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .sw-monogram {
+            width: 40px; height: 40px;
+            border: 2px solid var(--accent-yellow);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 0.8rem;
+            color: var(--accent-yellow);
+            flex-shrink: 0;
+            box-shadow: 0 0 12px rgba(255,232,31,0.2);
+        }
+
+        .sidebar-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 8px rgba(0,212,255,0.3);
+        }
+
+        .sidebar-search {
+            padding: 14px 16px;
+            position: relative;
+        }
+
+        .sidebar-search i {
+            position: absolute;
+            left: 28px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .sidebar-search input {
+            width: 100%;
+            background: rgba(0,212,255,0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 8px 12px 8px 30px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
+        }
+
+        .sidebar-search input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 8px rgba(0,212,255,0.15);
+        }
+
+        .sidebar-search input::placeholder { color: var(--text-muted); }
+
+        .toc-list {
+            list-style: none;
+            flex: 1;
+            overflow-y: auto;
+            padding: 6px 0;
+        }
+
+        .toc-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: all 0.3s var(--ease);
+            border-left: 3px solid transparent;
+        }
+
+        .toc-link:hover { color: var(--text-primary); background: rgba(0,212,255,0.05); }
+
+        .toc-link.active {
+            color: var(--accent-cyan);
+            border-left-color: var(--accent-cyan);
+            background: rgba(0,212,255,0.08);
+        }
+
+        .toc-num {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            min-width: 18px;
+        }
+
+        .toc-link.active .toc-num { color: var(--accent-cyan); }
+
+        .btn-print {
+            margin: 10px 16px 20px;
+            padding: 10px 16px;
+            background: rgba(0,212,255,0.1);
+            border: 1px solid var(--border-glow);
+            border-radius: 8px;
+            color: var(--accent-cyan);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s var(--ease);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-print:hover {
+            background: rgba(0,212,255,0.2);
+            box-shadow: 0 0 15px rgba(0,212,255,0.15);
+        }
+
+        /* === MENÚ MÓVIL === */
+        #menuToggle {
+            display: none;
+            position: fixed;
+            top: 10px; left: 10px;
+            width: 42px; height: 42px;
+            background: var(--bg-sidebar);
+            border: 1px solid var(--border-glow);
+            border-radius: 10px;
+            color: var(--accent-cyan);
+            font-size: 1rem;
+            cursor: pointer;
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: background 0.3s var(--ease);
+        }
+
+        #menuToggle:hover { background: rgba(0,212,255,0.15); }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 90;
+        }
+
+        /* === CONTENIDO PRINCIPAL === */
+        #content {
+            margin-left: var(--sidebar-width);
+            padding: 0 40px 60px;
+            max-width: 880px;
+        }
+
+        /* === BARRA DE ESTADO === */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: rgba(0,212,255,0.04);
+            border-bottom: 1px solid var(--border-subtle);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.55rem;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .status-dot {
+            width: 6px; height: 6px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            box-shadow: 0 0 6px var(--accent-green);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        .status-signal { color: var(--accent-green); letter-spacing: 1px; }
+
+        /* === HERO === */
+        .hero { padding: 48px 0 28px; text-align: center; }
+
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.7rem, 4vw, 2.6rem);
+            font-weight: 900;
+            color: var(--accent-yellow);
+            text-shadow: 0 0 40px rgba(255,232,31,0.25), 0 2px 4px rgba(0,0,0,0.6);
+            letter-spacing: 4px;
+            line-height: 1.2;
+            animation: hero-in 0.8s var(--ease) both;
+        }
+
+        @keyframes hero-in { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+        .hero-subtitle {
+            margin-top: 12px;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 400;
+            animation: hero-in 0.8s var(--ease) 0.15s both;
+        }
+
+        .hero-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 22px;
+            animation: hero-in 0.8s var(--ease) 0.3s both;
+        }
+
+        .divider-line {
+            height: 1px;
+            width: 70px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+        }
+
+        .divider-diamond { color: var(--accent-cyan); font-size: 0.55rem; }
+
+        /* === SECCIONES === */
+        .guide-section {
+            margin-bottom: 14px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-panel);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: border-color 0.3s var(--ease), opacity 0.5s ease, transform 0.5s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .guide-section.visible { opacity: 1; transform: translateY(0); }
+        .guide-section:hover { border-color: var(--border-glow); }
+        .guide-section.hidden { display: none; }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            background: var(--bg-section-header);
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.3s var(--ease);
+        }
+
+        .section-header:hover { background: rgba(0,180,220,0.12); }
+        .section-header:focus-visible { outline: 2px solid var(--accent-cyan); outline-offset: -2px; }
+
+        .section-num {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            background: rgba(0,212,255,0.1);
+            border: 1px solid rgba(0,212,255,0.2);
+            border-radius: 6px;
+            padding: 4px 8px;
+            flex-shrink: 0;
+        }
+
+        .section-icon { color: var(--accent-yellow); font-size: 0.85rem; width: 20px; text-align: center; flex-shrink: 0; }
+
+        .section-header h2 {
+            flex: 1;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--accent-yellow);
+            letter-spacing: 2px;
+        }
+
+        .section-chevron {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            transition: transform 0.3s var(--ease);
+            flex-shrink: 0;
+        }
+
+        .section-header.collapsed .section-chevron { transform: rotate(-90deg); }
+
+        .section-body {
+            padding: 20px;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease, opacity 0.3s ease;
+            max-height: 2000px;
+            opacity: 1;
+        }
+
+        .section-body.collapsed { max-height: 0; padding-top: 0; padding-bottom: 0; opacity: 0; }
+
+        /* === CONTENIDO INTERNO === */
+        .section-body h3 {
+            color: var(--accent-cyan);
+            font-size: 1.02rem;
+            font-weight: 600;
+            margin: 16px 0 8px;
+            padding-left: 12px;
+            border-left: 2px solid var(--accent-cyan);
+        }
+
+        .section-body h3:first-child { margin-top: 0; }
+
+        .section-body p {
+            color: var(--text-primary);
+            font-size: 0.92rem;
+            margin-bottom: 8px;
+        }
+
+        .section-body ul, .section-body ol { padding-left: 20px; margin-bottom: 10px; }
+
+        .section-body li { color: var(--text-primary); font-size: 0.92rem; margin-bottom: 4px; }
+        .section-body strong { color: #fff; }
+
+        /* === TABLAS === */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 12px 0;
+            border-radius: 8px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .section-body table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.86rem;
+            min-width: 420px;
+        }
+
+        .section-body th {
+            background: rgba(0,212,255,0.1);
+            color: var(--accent-yellow);
+            padding: 10px 14px;
+            text-align: left;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border-glow);
+            white-space: nowrap;
+        }
+
+        .section-body td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+        }
+
+        .section-body tr:last-child td { border-bottom: none; }
+        .section-body tr:nth-child(even) { background: rgba(0,0,0,0.15); }
+        .section-body tr:hover { background: rgba(0,212,255,0.05); }
+
+        /* === BADGES === */
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .badge.accion   { background: rgba(46,213,115,0.15); color: #2ed573; border: 1px solid rgba(46,213,115,0.3); }
+        .badge.ataque    { background: rgba(255,71,87,0.15);  color: #ff4757; border: 1px solid rgba(255,71,87,0.3); }
+        .badge.defensa   { background: rgba(91,127,255,0.15); color: #5b7fff; border: 1px solid rgba(91,127,255,0.3); }
+        .badge.condicion { background: rgba(255,165,2,0.15);  color: #ffa502; border: 1px solid rgba(255,165,2,0.3); }
+
+        /* === PIE === */
+        .guide-footer {
+            text-align: center;
+            padding: 30px 0 10px;
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        .guide-footer::before {
+            content: '✦';
+            display: block;
+            margin-bottom: 8px;
+            color: var(--accent-yellow);
+            font-size: 0.7rem;
+            opacity: 0.5;
+        }
+
+        /* === BOTÓN VOLVER ARRIBA === */
+        #backToTop {
+            position: fixed;
+            bottom: 24px; right: 24px;
+            width: 42px; height: 42px;
+            background: var(--bg-sidebar);
+            border: 1px solid var(--border-glow);
+            border-radius: 50%;
+            color: var(--accent-cyan);
+            font-size: 0.85rem;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s var(--ease);
+            pointer-events: none;
+            backdrop-filter: blur(10px);
+            -webkit-backclip-filter: blur(10px);
+        }
+
+        #backToTop.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        #backToTop:hover { background: rgba(0,212,255,0.2); box-shadow: 0 0 15px rgba(0,212,255,0.2); }
+
+        /* === TOAST === */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--bg-sidebar);
+            border: 1px solid var(--border-glow);
+            border-radius: 10px;
+            padding: 12px 24px;
+            color: var(--accent-cyan);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 10000;
+            opacity: 0;
+            transition: all 0.4s var(--ease);
+            pointer-events: none;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            white-space: nowrap;
+        }
+
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* === SIN RESULTADOS === */
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 1rem;
+            display: none;
+        }
+
+        .no-results i { font-size: 2rem; display: block; margin-bottom: 12px; color: var(--accent-cyan); opacity: 0.4; }
+        .no-results.show { display: block; }
+
+        /* === MÓVIL === */
+        @media (max-width: 768px) {
+            #menuToggle { display: flex; }
+            #sidebar { transform: translateX(-100%); }
+            #sidebar.open { transform: translateX(0); }
+            .overlay.active { display: block; }
+            #content { margin-left: 0; padding: 0 14px 40px; }
+            .status-bar { padding-left: 54px; }
+            .hero { padding: 36px 0 20px; }
+            .hero-title { letter-spacing: 2px; }
+            .section-header { padding: 12px 14px; gap: 8px; }
+            .section-header h2 { font-size: 0.78rem; letter-spacing: 1px; }
+            .section-body { padding: 14px; }
+        }
+
+        @media (max-width: 420px) {
+            .section-num { display: none; }
+            .section-icon { display: none; }
+        }
+
+        /* === REDUCIR MOVIMIENTO === */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+            .guide-section { opacity: 1; transform: none; }
+            .hero-title, .hero-subtitle, .hero-divider { animation: none; opacity: 1; }
+        }
+
+        /* === IMPRESIÓN === */
+        @media print {
+            body { background: #fff; color: #111; font-size: 10pt; }
+            #starfield, .scanlines, .nebula, #sidebar, #menuToggle, .overlay, #backToTop, .toast, .status-bar, .no-results { display: none !important; }
+
+            #content { margin-left: 0; padding: 0; max-width: 100%; }
+
+            .hero { padding: 20px 0 14px; border-bottom: 2px solid #b8860b; margin-bottom: 16px; }
+            .hero-title { color: #b8860b; text-shadow: none; font-size: 18pt; letter-spacing: 2px; }
+            .hero-subtitle { color: #444; font-size: 10pt; }
+            .hero-divider { display: none; }
+
+            .guide-section {
+                opacity: 1; transform: none;
+                border: 1px solid #bbb; background: #f9f9f9;
+                border-radius: 6px; page-break-inside: avoid; margin-bottom: 10px;
+            }
+
+            .section-header { background: #eee; cursor: default; }
+            .section-num { color: #666; background: #ddd; border-color: #bbb; }
+            .section-icon { color: #b8860b; }
+            .section-header h2 { color: #b8860b; }
+            .section-chevron { display: none; }
+
+            .section-body { max-height: none !important; opacity: 1 !important; padding: 12px; }
+
+            .section-body h3 { color: #2c5a6e; border-left-color: #2c5a6e; }
+            .section-body p, .section-body li { color: #222; }
+            .section-body strong { color: #000; }
+
+            .table-wrapper { border-color: #bbb; }
+            .section-body th { background: #e0e0e0; color: #222; border-bottom-color: #999; }
+            .section-body td { color: #222; border-bottom-color: #ddd; }
+            .section-body tr:nth-child(even) { background: #f0f0f0; }
+
+            .badge { border: 1px solid #999; background: #eee !important; color: #333 !important; }
+
+            .guide-footer { color: #666; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="starfield" aria-hidden="true"></canvas>
+    <div class="scanlines" aria-hidden="true"></div>
+    <div class="nebula nebula-1" aria-hidden="true"></div>
+    <div class="nebula nebula-2" aria-hidden="true"></div>
+    <div class="nebula nebula-3" aria-hidden="true"></div>
+
+    <button id="menuToggle" aria-label="Abrir menú de navegación">
+        <i class="fas fa-bars"></i>
+    </button>
+    <div id="overlay" class="overlay"></div>
+
+    <nav id="sidebar" aria-label="Tabla de contenidos">
+        <div class="sidebar-header">
+            <div class="sw-monogram" aria-hidden="true">SW</div>
+            <span class="sidebar-title">DATAPAD</span>
+        </div>
+        <div class="sidebar-search">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input type="text" id="searchInput" placeholder="Buscar..." aria-label="Buscar en la guía">
+        </div>
+        <ul class="toc-list" role="list">
+            <li><a href="#iniciativa" class="toc-link active" data-section="iniciativa"><span class="toc-num">01</span>Iniciativa</a></li>
+            <li><a href="#acciones" class="toc-link" data-section="acciones"><span class="toc-num">02</span>Acciones</a></li>
+            <li><a href="#ataque-defensa" class="toc-link" data-section="ataque-defensa"><span class="toc-num">03</span>Ataque y Defensa</a></li>
+            <li><a href="#dano-condiciones" class="toc-link" data-section="dano-condiciones"><span class="toc-num">04</span>Daño y Condiciones</a></li>
+            <li><a href="#habilidades" class="toc-link" data-section="habilidades"><span class="toc-num">05</span>Habilidades</a></li>
+            <li><a href="#consejos" class="toc-link" data-section="consejos"><span class="toc-num">06</span>Consejos Rápidos</a></li>
+        </ul>
+        <button class="btn-print" id="printBtn" aria-label="Imprimir guía como PDF">
+            <i class="fas fa-print"></i> Imprimir / PDF
+        </button>
+    </nav>
+
+    <main id="content">
+        <div class="status-bar" aria-hidden="true">
+            <span><span class="status-dot"></span>COMBAT REFERENCE — CLASSIFIED</span>
+            <span class="status-signal">SAGA ED. ◆◆◆</span>
+        </div>
+
+        <header class="hero">
+            <h1 class="hero-title">GUÍA RÁPIDA<br>DE COMBATE</h1>
+            <p class="hero-subtitle">Star Wars Saga Edition — Referencia esencial para jugadores</p>
+            <div class="hero-divider" aria-hidden="true">
+                <span class="divider-line"></span>
+                <span class="divider-diamond">◆</span>
+                <span class="divider-line"></span>
+            </div>
+        </header>
+
+        <div class="no-results" id="noResults">
+            <i class="fas fa-satellite-dish"></i>
+            No se encontraron resultados para esa búsqueda
+        </div>
+
+        <!-- SECCIÓN 1: INICIATIVA -->
+        <section id="iniciativa" class="guide-section" data-title="Iniciativa">
+            <div class="section-header" role="button" tabindex="0" aria-expanded="true" aria-controls="body-iniciativa">
+                <span class="section-num">01</span>
+                <i class="fas fa-bolt section-icon" aria-hidden="true"></i>
+                <h2>INICIATIVA</h2>
+                <i class="fas fa-chevron-down section-chevron" aria-hidden="true"></i>
+            </div>
+            <div class="section-body" id="body-iniciativa">
+                <p>Al comenzar un combate, todos los participantes <strong>tiran 1d20 + modificador de Destreza</strong> para determinar el orden de actuación. El personaje con el resultado más alto actúa primero.</p>
+                <ul>
+                    <li><strong>Empate:</strong> Se desempata con la tirada de Destreza (sin el d20). Si sigue empatado, se tira de nuevo.</li>
+                    <li><strong>Emboscada:</strong> Si un bando pilla por sorpresa al otro, ese bando obtiene una <strong>ronda de asalto</strong> completa antes de que el otro pueda actuar.</li>
+                    <li><strong>Dotes que mejoran la Iniciativa:</strong> Reflejos rápidos (+2), Liderazgo (puede dar +1 a aliados).</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: ACCIONES -->
+        <section id="acciones" class="guide-section" data-title="Acciones en combate">
+            <div class="section-header" role="button" tabindex="0" aria-expanded="true" aria-controls="body-acciones">
+                <span class="section-num">02</span>
+                <i class="fas fa-hand-pointer section-icon" aria-hidden="true"></i>
+                <h2>ACCIONES EN COMBATE</h2>
+                <i class="fas fa-chevron-down section-chevron" aria-hidden="true"></i>
+            </div>
+            <div class="section-body" id="body-acciones">
+                <p>En tu turno, dispones de una <strong>Acción Estándar</strong>, una <strong>Acción de Movimiento</strong> y una <strong>Acción Rápida</strong>. Además, puedes realizar una <strong>Acción de Asalto Completo</strong> en lugar de la Estándar y de Movimiento.</p>
+
+                <h3>Acción Estándar</h3>
+                <ul>
+                    <li><strong>Atacar</strong> (cuerpo a cuerpo o a distancia).</li>
+                    <li><strong>Usar una habilidad</strong> en combate (ej. Intimidar, Engañar).</li>
+                    <li><strong>Usar un poder de la Fuerza</strong> (si eres sensible).</li>
+                    <li><strong>Ayudar a otro</strong> (otorga +2 a su tirada).</li>
+                    <li><strong>Preparar una acción</strong> (esperar a que ocurra algo para actuar).</li>
+                </ul>
+
+                <h3>Acción de Movimiento</h3>
+                <ul>
+                    <li><strong>Moverse</strong> hasta tu velocidad (6 casillas normalmente).</li>
+                    <li><strong>Levantarse</strong> (si estás tumbado).</li>
+                    <li><strong>Recargar</strong> un arma (acción completa si es pesada).</li>
+                    <li><strong>Abrir/cerrar una puerta</strong>.</li>
+                    <li><strong>Desenfundar/guardar</strong> un arma o un objeto.</li>
+                </ul>
+
+                <h3>Acción Rápida</h3>
+                <ul>
+                    <li><strong>Hablar</strong> una frase corta.</li>
+                    <li><strong>Dejar caer</strong> un objeto.</li>
+                    <li><strong>Activar</strong> un objeto (ej. un comunicador).</li>
+                    <li><strong>Cambiar</strong> el enfoque de un poder.</li>
+                </ul>
+
+                <h3>Acción de Asalto Completo</h3>
+                <ul>
+                    <li><strong>Ataque completo</strong> (si tienes múltiples ataques, los realizas todos).</li>
+                    <li><strong>Cargar</strong> (moverse y atacar con +2 a la tirada de ataque, pero -2 a la Defensa hasta tu próximo turno).</li>
+                    <li><strong>Retirada completa</strong> (moverse el doble de tu velocidad, pero provoca ataques de oportunidad).</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: ATAQUE Y DEFENSA -->
+        <section id="ataque-defensa" class="guide-section" data-title="Ataque y Defensa">
+            <div class="section-header" role="button" tabindex="0" aria-expanded="true" aria-controls="body-ataque-defensa">
+                <span class="section-num">03</span>
+                <i class="fas fa-crosshairs section-icon" aria-hidden="true"></i>
+                <h2>ATAQUE Y DEFENSA</h2>
+                <i class="fas fa-chevron-down section-chevron" aria-hidden="true"></i>
+            </div>
+            <div class="section-body" id="body-ataque-defensa">
+                <h3>Realizar un ataque</h3>
+                <p><strong>Tirada:</strong> 1d20 + Nivel + modificador de Fuerza (cuerpo) o Destreza (distancia) + bonificaciones (dotes, talentos, etc.).</p>
+                <p><strong>Objetivo:</strong> Superar la <strong>Defensa de Reflejos</strong> del enemigo.</p>
+                <ul>
+                    <li><strong>Éxito:</strong> Superas la Defensa → tiras el daño del arma.</li>
+                    <li><strong>Fallo:</strong> No superas la Defensa → el ataque no causa daño.</li>
+                    <li><strong>Crítico:</strong> Si sacas un 20 natural, el ataque es automático y el daño se multiplica (normalmente x2).</li>
+                </ul>
+
+                <h3>Defensas</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <caption style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0">Tabla de defensas con fórmulas y tipos de ataque</caption>
+                        <thead>
+                            <tr><th scope="col">Defensa</th><th scope="col">Fórmula</th><th scope="col">Se usa contra</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><span class="badge defensa">Reflejos</span></td><td>10 + Nivel + DES</td><td>Disparos, sables, explosiones, ataques físicos</td></tr>
+                            <tr><td><span class="badge defensa">Fortaleza</span></td><td>10 + Nivel + CON</td><td>Veneno, enfermedades, empujones, derribos</td></tr>
+                            <tr><td><span class="badge defensa">Voluntad</span></td><td>10 + Nivel + SAB</td><td>Engaños, miedo, poderes mentales, persuasión</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p><strong>Umbral de Daño:</strong> Igual a tu Defensa de Fortaleza. Si un ataque supera el daño de este umbral, sufres una <strong>condición</strong> (ver sección 4).</p>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 4: DAÑO Y CONDICIONES -->
+        <section id="dano-condiciones" class="guide-section" data-title="Daño y Condiciones">
+            <div class="section-header" role="button" tabindex="0" aria-expanded="true" aria-controls="body-dano-condiciones">
+                <span class="section-num">04</span>
+                <i class="fas fa-heart-crack section-icon" aria-hidden="true"></i>
+                <h2>DAÑO Y CONDICIONES</h2>
+                <i class="fas fa-chevron-down section-chevron" aria-hidden="true"></i>
+            </div>
+            <div class="section-body" id="body-dano-condiciones">
+                <h3>Daño</h3>
+                <ul>
+                    <li>Cada arma tiene un dado de daño (ej. 2d8 para un sable de luz).</li>
+                    <li>Se suma el modificador de Fuerza (para ataques cuerpo a cuerpo) o Destreza (para distancia, si se aplica).</li>
+                    <li>El daño se resta de los <strong>Puntos de Golpe (PG)</strong> del objetivo.</li>
+                    <li>Si los PG llegan a 0, el personaje cae <strong>inconsciente</strong>.</li>
+                    <li>Si los PG llegan a -10, el personaje <strong>muere</strong>.</li>
+                </ul>
+
+                <h3>Condiciones por Umbral de Daño</h3>
+                <p>Cada vez que un ataque supera tu Umbral de Daño (Fortaleza), sufres una <strong>condición</strong> que empeora tu rendimiento:</p>
+                <div class="table-wrapper">
+                    <table>
+                        <caption style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0">Tabla de condiciones por umbral de daño</caption>
+                        <thead>
+                            <tr><th scope="col">Condición</th><th scope="col">Penalización</th><th scope="col">Descripción</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><span class="badge condicion">Herido</span></td><td>-1 a todo</td><td>Daño moderado</td></tr>
+                            <tr><td><span class="badge condicion">Herido grave</span></td><td>-2 a todo</td><td>Daño severo</td></tr>
+                            <tr><td><span class="badge condicion">Aturdido</span></td><td>-5 a todo</td><td>Aturdido por el impacto</td></tr>
+                            <tr><td><span class="badge condicion">Inconsciente</span></td><td>Caes al suelo</td><td>PG a 0 o menos</td></tr>
+                            <tr><td><span class="badge condicion">Muerto</span></td><td>Fuera de combate</td><td>PG = -10 o menos</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p><strong>Recuperación:</strong> Las condiciones se recuperan con descanso, curación o poderes de la Fuerza.</p>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 5: HABILIDADES -->
+        <section id="habilidades" class="guide-section" data-title="Habilidades en combate">
+            <div class="section-header" role="button" tabindex="0" aria-expanded="true" aria-controls="body-habilidades">
+                <span class="section-num">05</span>
+                <i class="fas fa-brain section-icon" aria-hidden="true"></i>
+                <h2>HABILIDADES EN COMBATE</h2>
+                <i class="fas fa-chevron-down section-chevron" aria-hidden="true"></i>
+            </div>
+            <div class="section-body" id="body-habilidades">
+                <p>Puedes usar habilidades en combate con una <strong>Acción Estándar</strong> (a menos que se indique lo contrario):</p>
+                <div class="table-wrapper">
+                    <table>
+                        <caption style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0">Tabla de habilidades utilizables en combate</caption>
+                        <thead>
+                            <tr><th scope="col">Habilidad</th><th scope="col">Acción</th><th scope="col">Efecto</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>Intimidar</strong></td><td><span class="badge accion">Estándar</span></td><td>Infundir miedo (opuesto a Voluntad).</td></tr>
+                            <tr><td><strong>Engañar</strong></td><td><span class="badge accion">Estándar</span></td><td>Crear distracción, fingir.</td></tr>
+                            <tr><td><strong>Percepción</strong></td><td><span class="badge accion">Rápida</span></td><td>Detectar escondidos, trampas.</td></tr>
+                            <tr><td><strong>Acrobacias</strong></td><td><span class="badge accion">Movimiento</span></td><td>Equilibrio, caídas.</td></tr>
+                            <tr><td><strong>Sigilo</strong></td><td><span class="badge accion">Movimiento</span></td><td>Ocultarse.</td></tr>
+                            <tr><td><strong>Usar la Fuerza</strong></td><td><span class="badge accion">Estándar</span></td><td>Poderes de la Fuerza.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 6: CONSEJOS -->
+        <section id="consejos" class="guide-section" data-title="Consejos rápidos">
+            <div class="section-header" role="button" tabindex="0" aria-expanded="true" aria-controls="body-consejos">
+                <span class="section-num">06</span>
+                <i class="fas fa-lightbulb section-icon" aria-hidden="true"></i>
+                <h2>CONSEJOS RÁPIDOS</h2>
+                <i class="fas fa-chevron-down section-chevron" aria-hidden="true"></i>
+            </div>
+            <div class="section-body" id="body-consejos">
+                <ul>
+                    <li><strong>Cobertura:</strong> Si estás tras una barricada, el enemigo tiene penalización de -2 o -5 a sus ataques.</li>
+                    <li><strong>Ataques de Oportunidad:</strong> Si un enemigo se mueve fuera de tu alcance, puedes atacarle gratuitamente (1 vez por turno).</li>
+                    <li><strong>Ayudar a otro:</strong> Puedes gastar tu acción estándar para dar +2 a un aliado en su siguiente tirada.</li>
+                    <li><strong>Usar objetos:</strong> Curarte con un kit médico o usar un objeto táctico puede cambiar el combate.</li>
+                    <li><strong>Dotes y talentos:</strong> Revisa tus dotes antes de combatir; muchos otorgan bonificaciones adicionales o nuevas opciones.</li>
+                </ul>
+            </div>
+        </section>
+
+        <footer class="guide-footer">
+            <p>"Que la Fuerza te acompañe"</p>
+        </footer>
+    </main>
+
+    <button id="backToTop" aria-label="Volver arriba">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+
+    <script>
+        /* === FONDO ESTELAR CON CANVAS === */
+        (function initStarfield() {
+            const canvas = document.getElementById('starfield');
+            const ctx = canvas.getContext('2d');
+            let stars = [];
+            const COUNT = 220;
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+
+            function create() {
+                stars = [];
+                for (let i = 0; i < COUNT; i++) {
+                    stars.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        r: Math.random() * 1.4 + 0.2,
+                        base: Math.random() * 0.6 + 0.2,
+                        speed: Math.random() * 0.015 + 0.004,
+                        phase: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+
+            function draw(t) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (const s of stars) {
+                    const flicker = Math.sin(t * s.speed + s.phase) * 0.3 + 0.7;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, Math.max(0.1, s.r), 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(190,210,255,${s.base * flicker})`;
+                    ctx.fill();
+                }
+                requestAnimationFrame(draw);
+            }
+
+            resize();
+            create();
+            requestAnimationFrame(draw);
+            window.addEventListener('resize', () => { resize(); create(); });
+        })();
+
+        /* === SECCIONES COLAPSABLES === */
+        document.querySelectorAll('.section-header').forEach(header => {
+            function toggle() {
+                const body = header.nextElementSibling;
+                const collapsed = header.classList.toggle('collapsed');
+                body.classList.toggle('collapsed', collapsed);
+                header.setAttribute('aria-expanded', String(!collapsed));
+            }
+            header.addEventListener('click', toggle);
+            header.addEventListener('keydown', e => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+            });
+        });
+
+        /* === BÚSQUEDA === */
+        const searchInput = document.getElementById('searchInput');
+        const sections = document.querySelectorAll('.guide-section');
+        const noResults = document.getElementById('noResults');
+
+        searchInput.addEventListener('input', () => {
+            const q = searchInput.value.toLowerCase().trim();
+            let visible = 0;
+
+            sections.forEach(sec => {
+                if (!q) {
+                    sec.classList.remove('hidden');
+                    sec.querySelector('.section-header').classList.remove('collapsed');
+                    sec.querySelector('.section-body').classList.remove('collapsed');
+                    visible++;
+                    return;
+                }
+                const match = sec.textContent.toLowerCase().includes(q);
+                sec.classList.toggle('hidden', !match);
+                if (match) {
+                    visible++;
+                    sec.querySelector('.section-header').classList.remove('collapsed');
+                    sec.querySelector('.section-body').classList.remove('collapsed');
+                }
+            });
+
+            noResults.classList.toggle('show', q.length > 0 && visible === 0);
+        });
+
+        /* === SCROLL SPY === */
+        const tocLinks = document.querySelectorAll('.toc-link');
+        const spyObs = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    tocLinks.forEach(l => l.classList.toggle('active', l.dataset.section === id));
+                }
+            });
+        }, { rootMargin: '-15% 0px -75% 0px' });
+
+        sections.forEach(s => spyObs.observe(s));
+
+        /* === ANIMACIÓN DE ENTRADA === */
+        const entryObs = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    entryObs.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.08 });
+
+        sections.forEach((s, i) => {
+            s.style.transitionDelay = `${i * 0.07}s`;
+            entryObs.observe(s);
+        });
+
+        /* === MENÚ MÓVIL === */
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+
+        function closeMenu() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+            menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+            menuToggle.setAttribute('aria-label', 'Abrir menú de navegación');
+        }
+
+        menuToggle.addEventListener('click', () => {
+            const opening = !sidebar.classList.contains('open');
+            sidebar.classList.toggle('open', opening);
+            overlay.classList.toggle('active', opening);
+            menuToggle.innerHTML = opening ? '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
+            menuToggle.setAttribute('aria-label', opening ? 'Cerrar menú de navegación' : 'Abrir menú de navegación');
+        });
+
+        overlay.addEventListener('click', closeMenu);
+
+        tocLinks.forEach(link => link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) closeMenu();
+        }));
+
+        /* === IMPRIMIR === */
+        document.getElementById('printBtn').addEventListener('click', () => {
+            showToast('Abriendo diálogo de impresión...');
+            setTimeout(() => window.print(), 350);
+        });
+
+        /* === VOLVER ARRIBA === */
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            backToTop.classList.toggle('visible', window.scrollY > 400);
+        }, { passive: true });
+
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        /* === TOAST === */
+        let toastTimer;
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            clearTimeout(toastTimer);
+            t.textContent = msg;
+            t.classList.add('show');
+            toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+        }
+    </script>
+</body>
+</html>
